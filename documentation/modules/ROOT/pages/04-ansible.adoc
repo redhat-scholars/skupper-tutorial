@@ -2,13 +2,13 @@
 = Deploying with Ansible
 include::_attributes.adoc[]
 
-So far, we've deployed and configred Skupper and the application manually using `skupper` and `kubectl`.
+So far, we've manually deployed and configured Skupper and the application using `skupper` and `kubectl`.
 One way to automate it is using https://www.ansible.com/[Ansible].
 
 [#ansible]
 == Ansible
 
-Ansible is an open source IT automation engine that automates provisioning, configuration management, application deployment, orchestration, and many other IT processes.
+Ansible is an open-source IT automation engine that automates provisioning, configuration management, application deployment, orchestration, and many other IT processes.
 There are different ways to https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html[install Ansible].
 The easiest way is using `pip`/`pipx`.
 
@@ -24,7 +24,7 @@ With Ansible installed, we need to install Ansible and Kubernetes Ansible module
 
 === Installing required Ansible modules
 
-To install Skupper and Kubernetes modules you need to use  the `ansible-galaxy` command already installed with Ansible.
+To install Skupper and Kubernetes modules, you must use the `ansible-galaxy` command already installed with Ansible.
 
 In a terminal window, run the following command:
 
@@ -36,11 +36,11 @@ ansible-galaxy collection install kubernetes.core
 ansible-galaxy collection install skupper.network
 ----
 
-With modules installed, we can move forward to store the Kubernetes `kubeconfig` files of noth clusters in the local directory:
+With modules installed, we can move forward to store the Kubernetes `kubeconfig` files of both clusters in the local directory:
 
 === Kubeconfigs
 
-To store the `kubeconfig` of the *cluster 1* export `KUBECONFIG` environment variable to the following value and then run `oc login` to craete the file with the required values:
+To store the `kubeconfig` of the *cluster 1* export `KUBECONFIG` environment variable to the following value and then run `oc login` to create the file with the required values:
 
 [.console-input]
 [source, bash]
@@ -51,8 +51,8 @@ oc login --token=sha256~sq_--server=https://api.sandbox-m4.g2pi.p1.openshiftapps
 ----
 <1> Change this to your specific arguments.
 
-Now, we need to store the information of the *cluster 2* into another `kubeconfig` file.
-First unset the previous `KUBECONFIG`, switch to _kind_ context, and finally use `kind` tool to materialize the file:
+Now, we need to store the *cluster 2* information into another `kubeconfig` file.
+First, unset the previous `KUBECONFIG`, switch to _kind_ context, and finally use the `kind` tool to materialize the file:
 
 [.console-input]
 [source, bash]
@@ -63,7 +63,7 @@ kubectx kind-kind-cluster
 kind export kubeconfig --name kind-cluster --kubeconfig `pwd`/privatek8sconfig
 ----
 
-At this point, we can refer to these files in Ansible to login to the clusters.
+We can now refer to these files in Ansible to log in to the clusters.
 Let's deploy the same application seen on xref:02-onprem.adoc[Chapter 2] but using Ansible instead of using CLI commands.
 
 [#ansiblemanifests]
@@ -71,9 +71,9 @@ Let's deploy the same application seen on xref:02-onprem.adoc[Chapter 2] but usi
 
 === Application manifests
 
-First of all, we need to create the Kubernetes manifests to deploy the application.
-They are the same used before, but as a reminder we'll paste it here again.
-Store them into the `kubernetes` folder, so you can refer them from Ansible playbook:
+First, we must create the Kubernetes manifests to deploy the application.
+They are the same ones used before, but we'll paste them here again as a reminder.
+Store them in the `kubernetes` folder so that you can refer them from the Ansible playbook:
 
 [.console-input]
 [source, yaml]
@@ -97,7 +97,7 @@ metadata:
   name: passport-storage
 spec:
   ports:
-    - name: http
+ - name: http
       port: 8080
       protocol: TCP
       targetPort: 8080
@@ -128,19 +128,19 @@ spec:
         app.kubernetes.io/version: 1.0.0-SNAPSHOT
     spec:
       containers:
-        - env:
-            - name: KUBERNETES_NAMESPACE
+ - env:
+ - name: KUBERNETES_NAMESPACE
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
           envFrom:
-            - configMapRef:
+ - configMapRef:
                 name: postgres-connection
           image: quay.io/rhdevelopers/passport-storage:1.0.0-SNAPSHOT
           imagePullPolicy: Always
           name: passport-storage
           ports:
-            - containerPort: 8080
+ - containerPort: 8080
               name: http
               protocol: TCP
 ---
@@ -191,13 +191,13 @@ spec:
         app: postgres
     spec:
       containers:
-        - name: postgres
+ - name: postgres
           image: 'postgres:14'
           imagePullPolicy: Always
           ports:
-            - containerPort: 5432
+ - containerPort: 5432
           envFrom:
-            - configMapRef:
+ - configMapRef:
                 name: postgres-secret
 ---
 apiVersion: v1
@@ -211,15 +211,15 @@ metadata:
 spec:
   type: "ClusterIP"
   ports:
-    - port: 5432
+ - port: 5432
   selector:
     app: postgres
 ----
 
 === Ansible Manifests
 
-Now, we need to create the two most important files in Ansible, the inventory and the playbook file.
-In this case, we are going to call the *cluster 1* west, and *cluster 2* east, as these names makes the playbook look more clear.
+We need to create the two most important files in Ansible, the inventory and the playbook file.
+In this case, we will call *cluster 1* west and *cluster 2* east, as these names make the playbook look clearer.
 
 === Inventory
 
@@ -240,25 +240,25 @@ all:
       kubeconfig: "{{ inventory_dir }}/privatek8sconfig"
       namespace: default
       links: # <5>
-        - host: west
+ - host: west
       services: # <6>
         postgres:
           ports:
-            - 5432
+ - 5432
           targets:
-            - type: deployment
+ - type: deployment
               name: postgres
 ----
 <1> Defines the west cluster.
-<2> Sets the `kubeconfig` file created in previous section
+<2> Sets the `kubeconfig` file created in the previous section
 <3> Sets the namespace
 <4> Defines the east cluster
 <5> Defines the link between clusters
-<6> Exposes the postgres service to west
+<6> Exposes the Postgres service to the west
 
 === Playbook
 
-The last thing before we can run Ansible is to create the playbook file which does two things, installs the app to both clusters and installs and configures Skupper:
+The last thing before we can run Ansible is to create the playbook file, which does two things: installs the app to both clusters and installs and configures Skupper:
 Create the following file:
 
 [.console-input]
@@ -267,13 +267,13 @@ Create the following file:
 ----
 - hosts: localhost
   tasks: # <1>
-    - name: Create To public
+ - name: Create To public
       kubernetes.core.k8s: # <2>
         src: ./kubernetes/public.yaml
         namespace: asotobue-dev
         kubeconfig: ./publick8sconfig
 
-    - name: Create To private
+ - name: Create To private
       kubernetes.core.k8s:
         src: ./kubernetes/private.yaml
         namespace: default
@@ -281,15 +281,15 @@ Create the following file:
 
 - hosts: all
   collections:
-    - skupper.network # <3>
+ - skupper.network # <3>
   tasks:
-    - import_role:
+ - import_role:
         name: skupper # <4>
 ----
 <1> Apply the application manifests to both clusters
 <2> Set the deployment file location and the cluster
 <3> Import Skupper collection
-<4> Apply the role for installing Skupper
+<4> Apply for the role of installing Skupper
 
 [#installappansible]
 == Install the Application
@@ -335,21 +335,21 @@ To clean up the clusters, create a new playbook invoking `skupper_delete` role.
 ----
 - hosts: all
   collections:
-    - skupper.network
+ - skupper.network
   tasks:
-    - import_role:
+ - import_role:
         name: skupper_delete
 
 - hosts: localhost
   tasks:
-    - name: Delete public
+ - name: Delete public
       kubernetes.core.k8s:
         state: absent
         src: ./kubernetes/public.yaml
         namespace: asotobue-dev
         kubeconfig: ./publick8sconfig
 
-    - name: Delete private
+ - name: Delete private
       kubernetes.core.k8s:
         state: absent
         src: ./kubernetes/private.yaml

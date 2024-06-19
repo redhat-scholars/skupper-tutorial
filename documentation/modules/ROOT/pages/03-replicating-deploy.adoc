@@ -1,10 +1,10 @@
 = Replicating Services
 include::_attributes.adoc[]
 
-Sometimes you want to replicate a service to another cloud (or region) for resiliency purposes, for example, in case a region goes down, you might want to redircet the traffic to another region.
+Sometimes, you want to replicate a service to another cloud (or region) for resiliency purposes. For example, in case a region goes down, you might want to redirect the traffic to another region.
 
 Let's deploy a backend in both clusters (*c1* and *c2*).
-Moreover, we'll inject the name of the cluster as an environment variable so we can identify where the response is coming.
+Moreover, we'll inject the cluster's name as an environment variable so we can identify where the response is coming from.
 
 Then, we'll deploy the frontend in *c1*, and configure Skupper.
 
@@ -13,7 +13,7 @@ image::replicate.png[]
 [#service-backend]
 == Deploying Backend
 
-First of all, we need to create a deployment file for the backend.
+First, we must create a deployment file for the backend.
 
 Create a new file named `backend.yaml` with the following content:
 
@@ -41,7 +41,7 @@ metadata:
   name: "hybrid-cloud-backend"
 spec:
   ports:
-  - name: "http"
+ - name: "http"
     port: 8080
     targetPort: 8080
   selector:
@@ -70,8 +70,8 @@ spec:
     spec:
       serviceAccountName: "hybrid-cloud-backend"
       containers:
-      - env:
-        - name: "KUBERNETES_NAMESPACE"
+ - env:
+ - name: "KUBERNETES_NAMESPACE"
           valueFrom:
             fieldRef:
               fieldPath: "metadata.namespace"
@@ -79,7 +79,7 @@ spec:
         imagePullPolicy: "Always"
         name: "hybrid-cloud-backend"
         ports:
-        - containerPort: 8080
+ - containerPort: 8080
           name: "http"
           protocol: "TCP"
 ----
@@ -118,7 +118,7 @@ kubectl set env deployment/hybrid-cloud-backend WORKER_CLOUD_ID="kind"
 [#service-frontend]
 == Deploying Frontend
 
-Create the following deployment file deploy the frontend to *Cluster 1*:
+Create the following deployment file and deploy the frontend to *Cluster 1*:
 
 [.console-input]
 [source, yaml]
@@ -142,7 +142,7 @@ metadata:
   name: "hybrid-cloud-frontend"
 spec:
   ports:
-  - name: "http"
+ - name: "http"
     port: 8080
     targetPort: 8080
   selector:
@@ -170,8 +170,8 @@ spec:
         app.kubernetes.io/version: "1.0.0"
     spec:
       containers:
-      - env:
-        - name: "KUBERNETES_NAMESPACE"
+ - env:
+ - name: "KUBERNETES_NAMESPACE"
           valueFrom:
             fieldRef:
               fieldPath: "metadata.namespace"
@@ -179,7 +179,7 @@ spec:
         imagePullPolicy: "IfNotPresent"
         name: "hybrid-cloud-frontend"
         ports:
-        - containerPort: 8080
+ - containerPort: 8080
           name: "http"
           protocol: "TCP"
       serviceAccount: "hybrid-cloud-frontend"
@@ -200,7 +200,7 @@ kubectl apply -f 2-frontend.yml
 === Exposing the Frontend
 
 The Frontend Kubernetes service is of type LoadBalancer. 
-If you are deploying the frontend in your public cluster you need to configure Ingress object, or in the case of OpenShift (like *Cluster 1*), you can use the Route object:
+If you are deploying the frontend in your public cluster, you need to configure the Ingress object, or in the case of OpenShift (like *Cluster 1*), you can use the Route object:
 
 
 [tabs, subs="attributes+,+macros"]
@@ -223,9 +223,9 @@ metadata:
   name: "hybrid-cloud-frontend"
 spec:
   rules:
-    - http:
+ - http:
         paths:
-          - backend:
+ - backend:
               service:
                 name: "hybrid-cloud-frontend"
                 port:
@@ -290,14 +290,14 @@ hybrid-cloud-frontend   hybrid-cloud-frontend-asotobue-dev.apps.sandbox-m4.g2pi.
 --
 ====
 
-At this point, you've got the backend deployed in both clusters, and frontend in the main cluster.
+At this point, the backend is deployed in both clusters, and the front end is in the main cluster.
 Now, let's deploy Skupper.
 
 [#installskupperproxyrep]
 == Installing Skupper Proxy
 
-Skupper can also be installed after application is running.
-In *cluster 1* (you have already the context pointing out there), install Skupper proxy, and generate the token:
+Skupper can also be installed after the application is running.
+In *cluster 1* (you already have the context pointing out there), install Skupper proxy and generate the token:
 
 [.console-input]
 [source, bash, subs="attributes+,+macros"]
@@ -347,11 +347,11 @@ Move to *cluster 1* context:
 kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue
 ----
 
-Open in a browser the location of the frontend, in this case `https://hybrid-cloud-frontend-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com`, and send a request .
+Open a browser, type in the frontend's location, in this case `https://hybrid-cloud-frontend-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com`, and send a request.
 
 image::home.png[]
 
-Then send the request, and you'll see that the request was processed by the same cluster as it is deployed the frontend (*cluster 1* sandbox).
+Then send the request, and you'll see that the same cluster processed the request as it is deployed the frontend (*cluster 1* sandbox).
 This is because Skupper first tries to connect to the closest service instance, in this case, the frontend one.
 
 image::main.png[]
@@ -364,7 +364,7 @@ Let's simulate that backend of *cluster 1* fails by scaling to 0:
 kubectl scale deployment hybrid-cloud-backend --replicas=0
 ----
 
-Then send again a request, and you'll notice it is sent to backend of the *cluster 2*, as the backend of the *cluster 1* is offline.
+Then send a request again, and you'll notice it is sent to the backend of cluster 2, as the backend of cluster 1 is offline.
 And this happens automatically:
 
 image::rebalance.png[]

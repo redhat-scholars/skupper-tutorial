@@ -1,0 +1,167 @@
+= Setup
+include::_attributes.adoc[]
+
+To run this deep dive, you need two different Kubernetes clusters.
+You can skip to the following chapter if you already have two clusters. If not, this chapter will show you how to start two, one in Red Hat Sandbox and the other locally with KinD.
+
+[#tools]
+== Tools
+
+To run this tutorial, you need at least two CLI tools, `kubectl` and `skupper`.
+
+=== Kubectl
+
+Any new version of `kubectl` should work, but the deep dive is tested with version {kubernetes-version}.
+
+[cols="4*^,4*.",options="header,+attributes"]
+|===
+|**Tool**|**macOS**|**Linux**|**windows**
+
+| `kubectl {kubernetes-version}`
+| https://storage.googleapis.com/kubernetes-release/release/{kubernetes-version}/bin/darwin/amd64/kubectl[Download AMD] https://storage.googleapis.com/kubernetes-release/release/{kubernetes-version}/bin/darwin/arm64/kubectl[Download ARM]
+| https://storage.googleapis.com/kubernetes-release/release/{kubernetes-version}/bin/linux/amd64/kubectl[Download]
+| https://storage.googleapis.com/kubernetes-release/release/{kubernetes-version}/bin/windows/amd64/kubectl.exe[Download]
+
+|===
+
+=== Skupper
+
+This deep dive is tested with Skupper 1.7.0.
+You can download the skupper CLI tool and copy to your `PATH` directory or use an installation script on Linux and Mac (https://skupper.io/install/index.html)
+
+|===
+|**Tool**|**macOS**|**Linux**|**windows**
+
+| `skupper 1.7.0`
+| https://github.com/skupperproject/skupper/releases/download/1.7.0/skupper-cli-1.7.0-mac-amd64.tgz[Download AMD] https://github.com/skupperproject/skupper/releases/download/1.7.0/skupper-cli-1.7.0-mac-arm64.tgz[Download ARM]
+| https://github.com/skupperproject/skupper/releases/download/1.7.0/skupper-cli-1.7.0-linux-amd64.tgz[Download]
+| https://github.com/skupperproject/skupper/releases/download/1.7.0/skupper-cli-1.7.0-windows-amd64.zip[Download]
+
+|===
+
+[#kubectx]
+== Optional tools
+
+It is not mandatory to install https://github.com/ahmetb/kubectx[kubectx], but since we will frequently change the Kubernetes context, I recommend it.
+
+== Setup Red Hat Sandbox
+
+include::https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/main/sandbox.adoc[]
+
+After you log in to the cluster, run the following command to learn the Kubernetes context.
+
+[.console-input]
+[source, bash]
+----
+kubectl config current-context
+
+asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue
+----
+
+This context name is important when you need to switch between clusters.
+
+In the rest of the deep dive, this cluster will be known as *cluster 1* or *c1*.
+
+[#kind]
+== KinD
+
+To run `KinD`, you need a container engine such as Docker or Podman running on your local machine.
+In this tutorial, we advocate for Podman as a container engine, as it offers a smooth integration with `KinD`.
+
+=== Installing Podman
+
+include::https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/main/podman.adoc[]
+
+=== Installing KinD
+
+include::https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/main/kind.adoc[]
+
+If you named it as in the screenshot, the Kubernetes context for this cluster is `kind-kind-cluster`.
+
+TIP: If you run the `kubectx`, you'll get a list of all current Kubernetes clusters.
+
+This cluster will be known in the rest of the deep dive as the *cluster 2* or *c2*.
+
+==== Configuring LoadBalancer
+
+By default, Skupper exposes itself as a Kubernetes LoadBalancer Service. 
+KinD doesn't provide LoadBalancer implementation, so we need to enable it. 
+To do that, we can install the MetalLB project.
+
+First, move to the KinD context, and apply the manifest to install the MetalLB project.
+
+[.console-input]
+[source, bash]
+----
+kubectx kind-kind-cluster
+
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml
+----
+
+Set up the address pool used by load balancers. First, you need to know the IP range used by KinD inside Podman, run the following command in a terminal window and get the `subnet` field in IPv4:
+
+[.console-input]
+[source, bash]
+----
+podman network inspect  kind
+----
+
+[.console-output]
+[source, bash]
+----
+[
+     {
+          "name": "kind",
+          "id": "c1e885627ce7f1fc8126f58f9434a16db5c301401379d9f9041e17659ceb5002",
+          "driver": "bridge",
+          "network_interface": "podman1",
+          "created": "2024-06-10T20:40:03.664158043+02:00",
+          "subnets": [
+               {
+                    "subnet": "fc00:f853:ccd:e793::/64",
+                    "gateway": "fc00:f853:ccd:e793::1"
+               },
+               {
+                    "subnet": "10.89.0.0/24",
+                    "gateway": "10.89.0.1"
+               }
+          ],
+----
+
+In this case, the IP range should be valid for the `10.89.0.0/24` subnet.
+For example, from `10.89.0.10` to `10.89.0.100`.
+
+The last thing is to create the `IPAddressPool` object, which contains the IP range a Kubernetes with a Load Balancer type can be assigned. 
+
+[.console-input]
+[source, yaml]
+.ip-pool.yaml
+----
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: example
+  namespace: metallb-system
+spec:
+  addresses:
+  - 10.89.0.10-10.89.0.100 # <1>
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: empty
+  namespace: metallb-system
+----
+<1> Substitute with your IP range
+
+Finally, apply the manifest:
+
+[.console-input]
+[source, bash]
+----
+kubectl apply -f ip-pool.yaml
+----
+
+TIP: If you are using `minikube`, you don't need to install MetalLB. You can run `minikube tunnel` in a terminal window, automatically assigning the IP to Kubernetes Services of type `LoadBalancer`.
+
+WARNING: If you use a Cloud Kubernetes installation like Red Hat Sandbox, you don't need to configure anything as they already have this feature provided by default.

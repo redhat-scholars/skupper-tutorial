@@ -1,0 +1,400 @@
+= Replicating Services
+include::_attributes.adoc[]
+
+Sometimes you want to replicate a service to another cloud (or region) for resiliency purposes, for example, in case a region goes down, you might want to redircet the traffic to another region.
+
+Let's deploy a backend in both clusters (*c1* and *c2*).
+Moreover, we'll inject the name of the cluster as an environment variable so we can identify where the response is coming.
+
+Then, we'll deploy the frontend in *c1*, and configure Skupper.
+
+image::replicate.png[]
+
+[#service-backend]
+== Deploying Backend
+
+First of all, we need to create a deployment file for the backend.
+
+Create a new file named `backend.yaml` with the following content:
+
+[.console-input]
+[source, yaml]
+.1-backend.yaml
+----
+---
+apiVersion: "v1"
+kind: "ServiceAccount"
+metadata:
+  labels:
+    app.kubernetes.io/name: "hybrid-cloud-backend"
+    app.kubernetes.io/version: "1.0.0"
+  name: "hybrid-cloud-backend"
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  annotations:
+    skupper.io/proxy: "http" # <1>
+  labels:
+    app.kubernetes.io/name: "hybrid-cloud-backend"
+    app.kubernetes.io/version: "1.0.0"
+  name: "hybrid-cloud-backend"
+spec:
+  ports:
+  - name: "http"
+    port: 8080
+    targetPort: 8080
+  selector:
+    app.kubernetes.io/name: "hybrid-cloud-backend"
+    app.kubernetes.io/version: "1.0.0"
+  type: "ClusterIP"
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  labels:
+    app.kubernetes.io/name: "hybrid-cloud-backend"
+    app.kubernetes.io/version: "1.0.0"
+  name: "hybrid-cloud-backend"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "hybrid-cloud-backend"
+      app.kubernetes.io/version: "1.0.0"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: "hybrid-cloud-backend"
+        app.kubernetes.io/version: "1.0.0"
+    spec:
+      serviceAccountName: "hybrid-cloud-backend"
+      containers:
+      - env:
+        - name: "KUBERNETES_NAMESPACE"
+          valueFrom:
+            fieldRef:
+              fieldPath: "metadata.namespace"
+        image: "quay.io/rhdevelopers/hybrid-cloud-backend:1.0.0" # <2>
+        imagePullPolicy: "Always"
+        name: "hybrid-cloud-backend"
+        ports:
+        - containerPort: 8080
+          name: "http"
+          protocol: "TCP"
+----
+<1> Sets the service to be skupperized
+<2> If you are using Podman in an ARM architecture use `quay.io/rhdevelopers/hybrid-cloud-backend:1.0.0-arm`
+
+[#deployment-backend-1]
+=== Deployment Backend to the Cluster 1
+
+While logged into the *Cluster 1*, run the following commands:
+
+[.console-input]
+[source, bash]
+----
+kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue // <1>
+
+kubectl apply -f 1-backend.yml
+kubectl set env deployment/hybrid-cloud-backend WORKER_CLOUD_ID="sandbox"
+----
+<1> Change to your context.
+
+[#deployment-backend-2]
+=== Deployment Backend to the Cluster 2
+
+While logged into the *Cluster 2*, run the following commands:
+
+[.console-input]
+[source, bash]
+----
+kubectx kind-kind-cluster
+
+kubectl apply -f 1-backend.yml
+kubectl set env deployment/hybrid-cloud-backend WORKER_CLOUD_ID="kind"
+----
+
+[#service-frontend]
+== Deploying Frontend
+
+Create the following deployment file deploy the frontend to *Cluster 1*:
+
+[.console-input]
+[source, yaml]
+.2-frontend.yaml
+----
+---
+apiVersion: "v1"
+kind: "ServiceAccount"
+metadata:
+  labels:
+    app.kubernetes.io/name: "hybrid-cloud-frontend"
+    app.kubernetes.io/version: "1.0.0"
+  name: "hybrid-cloud-frontend"
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  labels:
+    app.kubernetes.io/name: "hybrid-cloud-frontend"
+    app.kubernetes.io/version: "1.0.0"
+  name: "hybrid-cloud-frontend"
+spec:
+  ports:
+  - name: "http"
+    port: 8080
+    targetPort: 8080
+  selector:
+    app.kubernetes.io/name: "hybrid-cloud-frontend"
+    app.kubernetes.io/version: "1.0.0"
+  type: "LoadBalancer"
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  labels:
+    app.kubernetes.io/name: "hybrid-cloud-frontend"
+    app.kubernetes.io/version: "1.0.0"
+  name: "hybrid-cloud-frontend"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "hybrid-cloud-frontend"
+      app.kubernetes.io/version: "1.0.0"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: "hybrid-cloud-frontend"
+        app.kubernetes.io/version: "1.0.0"
+    spec:
+      containers:
+      - env:
+        - name: "KUBERNETES_NAMESPACE"
+          valueFrom:
+            fieldRef:
+              fieldPath: "metadata.namespace"
+        image: "quay.io/rhdevelopers/hybrid-cloud-frontend:1.0.0"
+        imagePullPolicy: "IfNotPresent"
+        name: "hybrid-cloud-frontend"
+        ports:
+        - containerPort: 8080
+          name: "http"
+          protocol: "TCP"
+      serviceAccount: "hybrid-cloud-frontend"
+---
+----
+
+Log again into the *Cluster 1* and deploy the frontend:
+
+[.console-input]
+[source, bash]
+----
+kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue // <1>
+
+kubectl apply -f 2-frontend.yml
+----
+<1> Change to your context.
+
+=== Exposing the Frontend
+
+The Frontend Kubernetes service is of type LoadBalancer. 
+If you are deploying the frontend in your public cluster you need to configure Ingress object, or in the case of OpenShift (like *Cluster 1*), you can use the Route object:
+
+
+[tabs, subs="attributes+,+macros"]
+====
+Ingress::
++
+--
+Create the following Ingress manifest and adjust the `host` with your hostname if necessary:
+
+[.console-input]
+[source, yaml,subs="attributes+,+macros"]
+.3-ingress.yaml
+----
+apiVersion: "networking.k8s.io/v1"
+kind: "Ingress"
+metadata:
+  labels:
+    app.kubernetes.io/name: "hybrid-cloud-frontend"
+    app.kubernetes.io/version: "1.0.0"
+  name: "hybrid-cloud-frontend"
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              service:
+                name: "hybrid-cloud-frontend"
+                port:
+                  number: 8080
+            path: "/"
+            pathType: Prefix
+----
+
+Then apply the resource:
+
+[.console-input]
+[source, bash, subs="attributes+,+macros"]
+----
+kubectl apply -f ingress.yaml
+
+kubectl get service hybrid-cloud-frontend -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"
+----
+--
+
+Route::
++
+--
+
+Create the following Route manifest:
+
+[.console-input]
+[source, yaml,subs="attributes+,+macros"]
+.3-route.yaml
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: hybrid-cloud-frontend
+spec:
+  tls:
+    termination: edge
+  to:
+    kind: Service
+    name: hybrid-cloud-frontend
+    weight: 100
+  wildcardPolicy: None
+----
+
+Then apply the resource:
+
+[.console-input]
+[source, bash, subs="attributes+,+macros"]
+----
+kubectl apply -f route.yaml
+
+kubectl get routes | grep frontend
+----
+
+[.console-ouput]
+[source, bash, subs="attributes+,+macros"]
+----
+...
+hybrid-cloud-frontend   hybrid-cloud-frontend-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com // <1>
+...
+----
+<1> We'll use this route to access frontend.
+--
+====
+
+At this point, you've got the backend deployed in both clusters, and frontend in the main cluster.
+Now, let's deploy Skupper.
+
+[#installskupperproxyrep]
+== Installing Skupper Proxy
+
+Skupper can also be installed after application is running.
+In *cluster 1* (you have already the context pointing out there), install Skupper proxy, and generate the token:
+
+[.console-input]
+[source, bash, subs="attributes+,+macros"]
+----
+skupper init --enable-console --enable-flow-collector --console-auth unsecured
+
+skupper token create ~/sandbox.token
+----
+
+Then in *cluster 2*, create the link:
+
+[.console-input]
+[source, bash, subs="attributes+,+macros"]
+----
+kubectx kind-kind-cluster
+
+skupper init
+
+skupper link create ~/sandbox.token
+----
+
+You can validate which services are exposed by running `service` subcommand:
+
+[.console-input]
+[source, bash, subs="attributes+,+macros"]
+----
+skupper service status
+----
+
+[.console-output]
+[source, bash, subs="attributes+,+macros"]
+----
+Services exposed through Skupper:
+╰─ hybrid-cloud-backend:8080 (http1)
+----
+
+Let's open the frontend website and send a request.
+
+[#frontendui]
+== Testing
+
+Move to *cluster 1* context:
+
+[.console-input]
+[source, bash, subs="attributes+,+macros"]
+----
+kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue
+----
+
+Open in a browser the location of the frontend, in this case `https://hybrid-cloud-frontend-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com`, and send a request .
+
+image::home.png[]
+
+Then send the request, and you'll see that the request was processed by the same cluster as it is deployed the frontend (*cluster 1* sandbox).
+This is because Skupper first tries to connect to the closest service instance, in this case, the frontend one.
+
+image::main.png[]
+
+Let's simulate that backend of *cluster 1* fails by scaling to 0:
+
+[.console-input]
+[source, bash, subs="attributes+,+macros"]
+----
+kubectl scale deployment hybrid-cloud-backend --replicas=0
+----
+
+Then send again a request, and you'll notice it is sent to backend of the *cluster 2*, as the backend of the *cluster 1* is offline.
+And this happens automatically:
+
+image::rebalance.png[]
+
+If you scale up the backend again, Skupper will start sending again to the backend deployed in *cluster 1*.
+
+[#cleanuprep]
+== Clean Up
+
+Let's clean the *cluster 2* namespace:
+
+[.console-input]
+[source, bash, subs="attributes+,+macros"]
+----
+kubectx kind-kind-cluster
+
+kubectl delete -f 1-backend.yaml
+skupper delete
+----
+
+Let's clean the *cluster 1* namespace:
+
+[.console-input]
+[source, bash]
+----
+kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue
+
+kubectl delete -f 1-backend.yaml
+kubectl delete -f 2-frontend.yaml
+kubectl delete -f 3-route.yaml
+
+skupper delete
+----

@@ -1,0 +1,549 @@
+= On-Prem Database
+include::_attributes.adoc[]
+
+Let's see the first use case of hybrid cloud.
+Suppose you've got a backend application that connects to a database to find some information.
+
+This database should be in a different cluster (or region) for any reason, maybe data locality, or on-prem cluster, or legacy system running in an old datacenter.
+
+In this example, we'll deploy the backend in the *cluster 1* and database in the *cluster 2*, and connect them as they were in the same cluster:
+
+image::onprem.png[]
+
+[#installskupperproxy]
+== Installing Skupper Proxy
+
+The first thing you ned to do is installing Skupper proxy in both clusters.
+
+In *cluster 1*, we'll install apart from the proxy, the Skupper data collector and the UI, while only Skupper proxy in *cluster 2*.
+
+=== Cluster 1
+
+Let's switch to *cluster 1* context and install Skupper using the `skupper` CLI.
+In a terminal window, move to the Red Hat Sandbox context and install Skupper Proxy, Console UI, and data collector:
+
+[.console-input]
+[source, bash]
+----
+kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue // <1>
+
+skupper init --enable-console --enable-flow-collector --console-auth unsecured // <2>
+----
+<1> Change to your context.
+<2> Console is opened for deep dive purposes. In production you should remove this last argument.
+
+[.console-output]
+[source, bash]
+----
+Skupper is now installed in namespace '...'.  Use 'skupper status' to get more information.
+----
+
+Now, let's install only Skupper Proxy to *cluster 2*.
+
+=== Cluster 2
+
+Let's switch to *cluster 2* context and install Skupper using the `skupper` CLI:
+
+[.console-input]
+[source, bash]
+----
+kubectx kind-kind-cluster
+
+skupper init // <1>
+----
+<1> Only Proxy.
+
+[.console-output]
+[source, bash]
+----
+Skupper is now installed in namespace '...'.  Use 'skupper status' to get more information.
+----
+
+TIP: You can run `skupper status` to check the status of Skupper in each cluster.
+
+[#linkingclusters]
+== Linking clusters
+
+After installation, you have the infrastructure you need, but your namespaces are not linked.
+There is no network tunnel between both namespaces. So let's create this connection.
+
+First, we need to switch to *cluster 1* and create a token with all information regarding this cluster.
+This token is a secret, and anyone who has the token can link to your namespace. 
+Make sure that only those you trust have access to it.
+
+[.console-input]
+[source, bash]
+----
+kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue // <1>
+
+skupper token create ~/sandbox.token // <2>
+----
+<1> Change to your context.
+<2> Use any directory.
+
+[.console-output]
+[source, bash]
+----
+Token written to /Users/asotobue/sandbox.token
+----
+
+Switch to *cluster 2* and use the generated token to create the link to cluster 1:
+
+[.console-input]
+[source, bash]
+----
+kubectx kind-kind-cluster
+
+skupper link create ~/sandbox.token // <1>
+----
+<1> Change the location to your directory.
+
+[.console-output]
+[source, bash]
+----
+Site configured to link to https://claims-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com:443/0f8e04f0-27fa-11ef-a1f4-0ad176238397 (name=link1)
+Check the status of the link using 'skupper link status'.
+----
+
+You can check the status of the link by calling `skupper link status`, as it might taken some seconds till the connecxtion is established:
+
+[.console-input]
+[source, bash]
+----
+skupper link status
+----
+
+[.console-output]
+[source, bash]
+----
+Links created from this site:
+
+	 Link link1 is connected
+----
+
+When both clusters are connected, we can start deploying each part of the application in each cluster.
+
+[#deployingapp]
+== Deploying The Application
+
+=== PostgreSQL
+
+Let's start deploying the PoostgreSQL database into *cluster 2* (KinD).
+First of all create the following YAML file to deploy the database:
+
+[.console-input]
+[source, yaml]
+.1-postgresql.yaml
+----
+---
+apiVersion: v1
+kind: ConfigMap # <1>
+metadata:
+  name: postgres-secret
+  labels:
+    app: postgres
+data:
+  POSTGRES_DB: psdb
+  POSTGRES_USER: psuser
+  POSTGRES_PASSWORD: pspassword
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: 'postgres:14'
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: postgres-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  annotations:
+    skupper.io/proxy: "tcp" # <2>
+  labels:
+    app: postgres
+spec:
+  type: "ClusterIP"
+  ports:
+    - port: 5432
+  selector:
+    app: postgres
+
+----
+<1> For deep dive proposes we stick to `ConfigMap`. For production you should use a secret management.
+<2> Only Kubernetes service annotated with `skupper.io/proxy` annotation is exposed. In this case `tcp` protocol.
+
+Finally, apply the manifest:
+
+[.console-input]
+[source, bash]
+----
+kubectx kind-kind-cluster
+
+kubectl apply -f 1-postgresql.yaml
+----
+
+[.console-output]
+[source, bash]
+----
+configmap/postgres-secret created
+deployment.apps/postgres created
+service/postgres created
+----
+
+After some seconds, postgreSQL database is running in our local cluster.
+Let's check what happened on the *cluster 1*.
+
+=== Validating linkage
+
+After applying the resource to *cluster 2*, it's time to check how *cluster 1* reacted to this event:
+Let's switch the context to *cluster 1*, remember that we have not deployed anything apart from Skupper in that cluster yet, and inspect the Kubernetes services presents:
+
+[.console-input]
+[source, bash]
+----
+kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue // <1>
+
+kubectl get services
+----
+<1> Change to your context.
+
+[.console-output]
+[source, bash]
+----
+postgres               ClusterIP   172.30.97.72   5432/TCP                              2m35s // <1>
+skupper                ClusterIP   172.30.44.118  8010/TCP,8080/TCP                     134m
+skupper-prometheus     ClusterIP   172.30.142.112 9090/TCP                              134m
+skupper-router         ClusterIP   172.30.197.12  55671/TCP,45671/TCP,8081/TCP          134m
+skupper-router-local   ClusterIP   172.30.40.94   5671/TCP                              134m
+----
+<1> A new Kubernetes Service poiting to the other cluster.
+
+You see that even though we created the PostgreSQL instance in *cluster 2*, this *cluster 1* also has a Kubernetes service named `postgres` (the same name as in *cluster 2*).
+Every time a request is sent to `postgres` service in Kubernetes *cluster 1* is automatically redirected to `postgres` service in Kubernetes *cluster 2* using the tunnel linked in the previous section. 
+
+=== Backend
+
+Let's deploy the backend to *cluster 1*. 
+This application will use `postgres` hostname as database hostname as it was deployed in the local cluster, and from its point of view , it will seem so, but thanks of Skupper the requests will be sent to the other cluster.
+
+Create a `ConfigMap` resource configuring the database connection:
+
+[.console-input]
+[source, yaml]
+.2-configuration-db.yaml
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-connection
+data:
+  QUARKUS_DATASOURCE_JDBC_URL: "jdbc:postgresql://postgres:5432/psdb" # <1>
+----
+<1> `postgres` hostname
+
+And apply it to *cluster 1*:
+
+[.console-input]
+[source, bash]
+----
+kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue // <1>
+
+kubectl apply -f 2-configuration-db.yaml
+----
+<1> Change to your context.
+
+Finally, deploy the backend:
+
+[.console-input]
+[source, yaml]
+.3-deployment-backend.yaml
+----
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: passport-storage
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+    app.kubernetes.io/managed-by: quarkus
+  name: passport-storage
+spec:
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app.kubernetes.io/name: passport-storage
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: passport-storage
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+    app.kubernetes.io/managed-by: quarkus
+  name: passport-storage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: passport-storage
+      app.kubernetes.io/version: 1.0.0-SNAPSHOT
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/managed-by: quarkus
+        app.kubernetes.io/name: passport-storage
+        app.kubernetes.io/version: 1.0.0-SNAPSHOT
+    spec:
+      containers:
+        - env:
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          envFrom:
+            - configMapRef:
+                name: postgres-connection # <1>
+          image: quay.io/rhdevelopers/passport-storage:1.0.0-SNAPSHOT
+          imagePullPolicy: Always
+          name: passport-storage
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+----
+<1> Points out to previous ConfigMap.
+
+And apply it:
+
+[.console-input]
+[source, bash]
+----
+kubectl apply -f 3-deployment-backend.yaml
+----
+
+[#testingperson]
+== Testing the Application
+
+To test the application let's send a request to backend requesting a list of all persons stored in the database.
+Notice that the flow will be from your laptop you'll send an HTTP request to *cluster 1*, then a query will be sent to database deployed in *cluster 2*, the result will come back to *cluster 1*, which finally are back to your laptop. 
+Long journey, super simple to configure it thanks of Skupper.
+
+The backend service needs to be exposed, if you are using Red Hat Sandbox or any OpenShift installation, you can use the `Route` object, if not, you will need to create an Ingress entry.
+
+[tabs, subs="attributes+,+macros"]
+====
+Ingress::
++
+--
+Create the following Ingress manifest and adjust the `host` with your hostname if necessary:
+
+[.console-input]
+[source, yaml,subs="attributes+,+macros"]
+.ingress.yaml
+----
+apiVersion: "networking.k8s.io/v1"
+kind: "Ingress"
+metadata:
+  labels:
+    app.kubernetes.io/name: "passport-storage"
+    app.kubernetes.io/version: "1.0.0"
+  name: "passport-storage"
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              service:
+                name: "passport-storage"
+                port:
+                  number: 8080
+            path: "/"
+            pathType: Prefix
+----
+
+Then apply the resource:
+
+[.console-input]
+[source, bash, subs="attributes+,+macros"]
+----
+kubectl apply -f ingress.yaml
+
+kubectl get service passport-storage -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"
+----
+--
+
+Route::
++
+--
+
+Create the following Route manifest:
+
+[.console-input]
+[source, yaml,subs="attributes+,+macros"]
+.route.yaml
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: passport-storage
+spec:
+  tls:
+    termination: edge
+  to:
+    kind: Service
+    name: passport-storage
+    weight: 100
+  wildcardPolicy: None
+----
+
+Then apply the resource:
+
+[.console-input]
+[source, bash, subs="attributes+,+macros"]
+----
+kubectl apply -f route.yaml
+
+kubectl get routes | grep passport
+----
+
+[.console-output]
+[source, bash, subs="attributes+,+macros"]
+----
+passport-storage       passport-storage-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com ...
+----
+--
+====
+
+With the endpoint to access the service send a request using `curl` (or any HTTP interface), to `/person` endpoint:
+
+[.console-input]
+[source, bash, subs="attributes+,+macros"]
+----
+curl https://passport-storage-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com/person
+----
+
+[.console-output]
+[source, bash, subs="attributes+,+macros"]
+----
+[{"id":1,"name":"Alex","surname":"Soto"},{"id":2,"name":"Natale","surname":"Vinto"}]
+----
+
+[#skuppermetrics]
+== Skupper Metrics
+
+You can access to Skupper UI to get an overview of the clusters, or consult collected that like traffic send through clusters.
+To access Skupper UI (which is running in *cluster 1*), you need to expose `skupper` service on port `8080`:
+
+[.console-input]
+[source, bash, subs="attributes+,+macros"]
+----
+kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue // <1>
+
+kubectl get services
+----
+<1> Change to your context.
+
+[.console-output]
+[source, bash, subs="attributes+,+macros"]
+----
+...
+skupper  ClusterIP   172.30.14.195  8010/TCP,8080/TCP 37m
+...
+----
+
+In case of using Red Hat Sandbox (Or OpenShift), Skupper automatically exposes the serice as a `Route`:
+
+[.console-input]
+[source, bash, subs="attributes+,+macros"]
+----
+kubectl get routes
+----
+
+[.console-output]
+[source, bash, subs="attributes+,+macros"]
+----
+...
+skupper skupper-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com skupper metrics
+...
+----
+
+Open a browser and set the provided URL in `https` protocol, in my case was `https://skupper-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com`.
+
+[IMPORTANT]
+====
+If credentials are requested to access the UI, by default, they are stored in a `secret`.
+
+[.console-input]
+[source, bash, subs="attributes+,+macros"]
+----
+kubectl get secret skupper-console-users -o jsonpath={.data.admin} | base64 -d
+----
+
+[.console-output]
+[source, bash, subs="attributes+,+macros"]
+----
+gRa0hNhx9p
+----
+
+Then the login is `admin` and the password is the value of the secret.
+====
+
+You can get a topology overview by clicking on `Toppology` button:
+
+image::skupperui1.png[]
+
+If you click on any service, then you can inspect metrics collected by Skupper:
+
+image::skupperui2.png[]
+
+[#cleanuponprem]
+== Clean Up
+
+Let's clean the *cluster 2* namespace:
+
+[.console-input]
+[source, bash, subs="attributes+,+macros"]
+----
+kubectx kind-kind-cluster
+
+kubectl delete -f 1-postgresql.yaml
+skupper delete
+----
+
+Let's clean the *cluster 1* namespace:
+
+[.console-input]
+[source, bash]
+----
+kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue // <1>
+
+kubectl delete -f 4-route.yaml
+kubectl delete -f 3-deployment-backend.yaml
+kubectl delete -f 2-configuration-db.yaml
+
+skupper delete
+----
+<1> Change to your context.

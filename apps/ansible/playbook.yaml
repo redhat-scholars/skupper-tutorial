@@ -1,0 +1,20 @@
+- hosts: localhost
+  tasks:
+    - name: Create To public
+      kubernetes.core.k8s:
+        src: ./kubernetes/public.yaml
+        namespace: asotobue-dev
+        kubeconfig: ./publick8sconfig
+
+    - name: Create To private
+      kubernetes.core.k8s:
+        src: ./kubernetes/private.yaml
+        namespace: default
+        kubeconfig: ./privatek8sconfig
+
+- hosts: all
+  collections:
+    - skupper.network
+  tasks:
+    - import_role:
+        name: skupper

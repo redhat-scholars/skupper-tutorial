@@ -1,0 +1,24 @@
+- hosts: all
+  collections:
+    - skupper.network
+  tasks:
+    - import_role:
+        name: skupper_delete
+
+- hosts: localhost
+  tasks:
+    - name: Delete public
+      kubernetes.core.k8s:
+        state: absent
+        src: ./kubernetes/public.yaml
+        namespace: asotobue-dev
+        kubeconfig: ./publick8sconfig
+
+    - name: Delete private
+      kubernetes.core.k8s:
+        state: absent
+        src: ./kubernetes/private.yaml
+        namespace: default
+        kubeconfig: ./privatek8sconfig
+
+

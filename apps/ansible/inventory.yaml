@@ -1,0 +1,19 @@
+all:
+  vars:
+    ansible_connection: local
+  hosts:
+    west:
+      kubeconfig: "{{ inventory_dir }}/publick8sconfig"
+      namespace: asotobue-dev
+    east:
+      kubeconfig: "{{ inventory_dir }}/privatek8sconfig"
+      namespace: default
+      links:
+        - host: west
+      services:
+        postgres:
+          ports:
+            - 5432
+          targets:
+            - type: deployment
+              name: postgres

@@ -158,14 +158,14 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Let&#8217;s see the first use case of hybrid cloud.
+<p>Let&#8217;s see the first use case of a hybrid cloud.
 Suppose you&#8217;ve got a backend application that connects to a database to find some information.</p>
 </div>
 <div class="paragraph">
-<p>This database should be in a different cluster (or region) for any reason, maybe data locality, or on-prem cluster, or legacy system running in an old datacenter.</p>
+<p>This database should be in a different cluster (or region) for any reason, a data locality, an on-prem cluster, or a legacy system running in an old data center.</p>
 </div>
 <div class="paragraph">
-<p>In this example, we&#8217;ll deploy the backend in the <strong>cluster 1</strong> and database in the <strong>cluster 2</strong>, and connect them as they were in the same cluster:</p>
+<p>In this example, we&#8217;ll deploy the backend in <strong>cluster 1</strong> and the database in <strong>cluster 2</strong>, and connect them as they were in the same cluster:</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -178,15 +178,15 @@ Suppose you&#8217;ve got a backend application that connects to a database to fi
 <h2 id="installskupperproxy"><a class="anchor" href="#installskupperproxy"></a>Installing Skupper Proxy</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The first thing you ned to do is installing Skupper proxy in both clusters.</p>
+<p>The first thing you need to do is install the Skupper proxy in both clusters.</p>
 </div>
 <div class="paragraph">
-<p>In <strong>cluster 1</strong>, we&#8217;ll install apart from the proxy, the Skupper data collector and the UI, while only Skupper proxy in <strong>cluster 2</strong>.</p>
+<p>In <strong>cluster 1</strong>, we&#8217;ll install the Skupper data collector and the UI separately from the proxy, while only the Skupper proxy will be in <strong>cluster 2</strong>.</p>
 </div>
 <div class="sect2">
 <h3 id="_cluster_1"><a class="anchor" href="#_cluster_1"></a>Cluster 1</h3>
 <div class="paragraph">
-<p>Let&#8217;s switch to <strong>cluster 1</strong> context and install Skupper using the <code>skupper</code> CLI.
+<p>Let&#8217;s switch to the <strong>cluster 1</strong> context and install Skupper using the <code>skupper</code> CLI.
 In a terminal window, move to the Red Hat Sandbox context and install Skupper Proxy, Console UI, and data collector:</p>
 </div>
 <div class="listingblock console-input">
@@ -204,7 +204,7 @@ skupper init --enable-console --enable-flow-collector --console-auth unsecured <
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Console is opened for deep dive purposes. In production you should remove this last argument.</td>
+<td>Console is opened for deep dive purposes. In production, you should remove this last argument.</td>
 </tr>
 </table>
 </div>
@@ -261,11 +261,11 @@ You can run <code>skupper status</code> to check the status of Skupper in each c
 <h2 id="linkingclusters"><a class="anchor" href="#linkingclusters"></a>Linking clusters</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>After installation, you have the infrastructure you need, but your namespaces are not linked.
-There is no network tunnel between both namespaces. So let&#8217;s create this connection.</p>
+<p>After installation, you have the necessary infrastructure, but your namespaces are not linked.
+There is no network tunnel between both namespaces. So, let&#8217;s create this connection.</p>
 </div>
 <div class="paragraph">
-<p>First, we need to switch to <strong>cluster 1</strong> and create a token with all information regarding this cluster.
+<p>First, we need to switch to <strong>cluster 1</strong> and create a token with all the information about this cluster.
 This token is a secret, and anyone who has the token can link to your namespace.
 Make sure that only those you trust have access to it.</p>
 </div>
@@ -318,7 +318,7 @@ Check the status of the link using 'skupper link status'.</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You can check the status of the link by calling <code>skupper link status</code>, as it might taken some seconds till the connecxtion is established:</p>
+<p>You can check the status of the link by calling <code>skupper link status</code>, as it might take some seconds till the connection is established:</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
@@ -329,7 +329,7 @@ Check the status of the link using 'skupper link status'.</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Links created from this site:
 
-	 Link link1 is connected</code></pre>
+   Link link1 is connected</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -343,8 +343,8 @@ Check the status of the link using 'skupper link status'.</code></pre>
 <div class="sect2">
 <h3 id="_postgresql"><a class="anchor" href="#_postgresql"></a>PostgreSQL</h3>
 <div class="paragraph">
-<p>Let&#8217;s start deploying the PoostgreSQL database into <strong>cluster 2</strong> (KinD).
-First of all create the following YAML file to deploy the database:</p>
+<p>Let&#8217;s deploy the PostgreSQL database into <strong>cluster 2</strong> (KinD).
+First of all, create the following YAML file to deploy the database:</p>
 </div>
 <div class="listingblock console-input">
 <div class="title">1-postgresql.yaml</div>
@@ -376,13 +376,13 @@ spec:
         app: postgres
     spec:
       containers:
-        - name: postgres
+ - name: postgres
           image: 'postgres:14'
           imagePullPolicy: Always
           ports:
-            - containerPort: 5432
+ - containerPort: 5432
           envFrom:
-            - configMapRef:
+ - configMapRef:
                 name: postgres-secret
 ---
 apiVersion: v1
@@ -396,7 +396,7 @@ metadata:
 spec:
   type: "ClusterIP"
   ports:
-    - port: 5432
+ - port: 5432
   selector:
     app: postgres</code></pre>
 </div>
@@ -405,11 +405,11 @@ spec:
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>For deep dive proposes we stick to <code>ConfigMap</code>. For production you should use a secret management.</td>
+<td>For deep dive proposes, we stick to <code>ConfigMap.</code> For production, you should use secret management.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Only Kubernetes service annotated with <code>skupper.io/proxy</code> annotation is exposed. In this case <code>tcp</code> protocol.</td>
+<td>Only Kubernetes service annotated with <code>skupper.io/proxy</code> annotation is exposed. In this case, <code>tcp</code> protocol.</td>
 </tr>
 </table>
 </div>
@@ -431,7 +431,7 @@ service/postgres created</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>After some seconds, postgreSQL database is running in our local cluster.
+<p>After some seconds, the PostgreSQL database is running in our local cluster.
 Let&#8217;s check what happened on the <strong>cluster 1</strong>.</p>
 </div>
 </div>
@@ -439,7 +439,7 @@ Let&#8217;s check what happened on the <strong>cluster 1</strong>.</p>
 <h3 id="_validating_linkage"><a class="anchor" href="#_validating_linkage"></a>Validating linkage</h3>
 <div class="paragraph">
 <p>After applying the resource to <strong>cluster 2</strong>, it&#8217;s time to check how <strong>cluster 1</strong> reacted to this event:
-Let&#8217;s switch the context to <strong>cluster 1</strong>, remember that we have not deployed anything apart from Skupper in that cluster yet, and inspect the Kubernetes services presents:</p>
+Let&#8217;s switch the context to <strong>cluster 1</strong>, remember that we have not deployed anything apart from Skupper in that cluster yet, and inspect the Kubernetes services presented:</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
@@ -469,20 +469,20 @@ skupper-router-local   ClusterIP   172.30.40.94   5671/TCP                      
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>A new Kubernetes Service poiting to the other cluster.</td>
+<td>A new Kubernetes Service pointing to the other cluster.</td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>You see that even though we created the PostgreSQL instance in <strong>cluster 2</strong>, this <strong>cluster 1</strong> also has a Kubernetes service named <code>postgres</code> (the same name as in <strong>cluster 2</strong>).
-Every time a request is sent to <code>postgres</code> service in Kubernetes <strong>cluster 1</strong> is automatically redirected to <code>postgres</code> service in Kubernetes <strong>cluster 2</strong> using the tunnel linked in the previous section.</p>
+<p>You see, even though we created the PostgreSQL instance in <strong>cluster 2</strong>, this <strong>cluster 1</strong> also has a Kubernetes service named <code>postgres</code> (the same name as in <strong>cluster 2</strong>).
+Every time a request is sent to the <code>postgres</code> service in Kubernetes <strong>cluster 1</strong>, it is automatically redirected to the <code>postgres</code> service in Kubernetes <strong>cluster 2</strong> using the tunnel linked in the previous section.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_backend"><a class="anchor" href="#_backend"></a>Backend</h3>
 <div class="paragraph">
 <p>Let&#8217;s deploy the backend to <strong>cluster 1</strong>.
-This application will use <code>postgres</code> hostname as database hostname as it was deployed in the local cluster, and from its point of view , it will seem so, but thanks of Skupper the requests will be sent to the other cluster.</p>
+This application will use the <code>postgres</code> hostname as the database hostname as it was deployed in the local cluster, and from its point of view, it will seem so, but thanks to Skupper, the requests will be sent to the other cluster.</p>
 </div>
 <div class="paragraph">
 <p>Create a <code>ConfigMap</code> resource configuring the database connection:</p>
@@ -541,7 +541,7 @@ metadata:
   name: passport-storage
 spec:
   ports:
-    - name: http
+ - name: http
       port: 8080
       protocol: TCP
       targetPort: 8080
@@ -572,19 +572,19 @@ spec:
         app.kubernetes.io/version: 1.0.0-SNAPSHOT
     spec:
       containers:
-        - env:
-            - name: KUBERNETES_NAMESPACE
+ - env:
+ - name: KUBERNETES_NAMESPACE
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
           envFrom:
-            - configMapRef:
+ - configMapRef:
                 name: postgres-connection <i class="conum" data-value="1"></i><b>(1)</b>
           image: quay.io/rhdevelopers/passport-storage:1.0.0-SNAPSHOT
           imagePullPolicy: Always
           name: passport-storage
           ports:
-            - containerPort: 8080
+ - containerPort: 8080
               name: http
               protocol: TCP</code></pre>
 </div>
@@ -612,12 +612,12 @@ spec:
 <h2 id="testingperson"><a class="anchor" href="#testingperson"></a>Testing the Application</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>To test the application let&#8217;s send a request to backend requesting a list of all persons stored in the database.
-Notice that the flow will be from your laptop you&#8217;ll send an HTTP request to <strong>cluster 1</strong>, then a query will be sent to database deployed in <strong>cluster 2</strong>, the result will come back to <strong>cluster 1</strong>, which finally are back to your laptop.
-Long journey, super simple to configure it thanks of Skupper.</p>
+<p>To test the application, let&#8217;s send a request to the backend for a list of all persons stored in the database.
+Notice that the flow will be from your laptop. You&#8217;ll send an HTTP request to <strong>cluster 1</strong>, then a query will be sent to the database deployed in <strong>cluster 2</strong>. The result will come back to <strong>cluster 1</strong>, which will finally return to your laptop.
+It&#8217;s a long journey, but it&#8217;s super simple to configure, thanks to Skupper.</p>
 </div>
 <div class="paragraph">
-<p>The backend service needs to be exposed, if you are using Red Hat Sandbox or any OpenShift installation, you can use the <code>Route</code> object, if not, you will need to create an Ingress entry.</p>
+<p>The backend service needs to be exposed. If you are using Red Hat Sandbox or any OpenShift installation, you can use the <code>Route</code> object; if not, you will need to create an Ingress entry.</p>
 </div>
 <div class="tabset is-loading">
 <div class="ulist tabs">
@@ -647,9 +647,9 @@ metadata:
   name: "passport-storage"
 spec:
   rules:
-    - http:
+ - http:
         paths:
-          - backend:
+ - backend:
               service:
                 name: "passport-storage"
                 port:
@@ -709,7 +709,7 @@ kubectl get routes | grep passport</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>With the endpoint to access the service send a request using <code>curl</code> (or any HTTP interface), to <code>/person</code> endpoint:</p>
+<p>With the endpoint to access the service, send a request using <code>curl</code> (or any HTTP interface), to <code>/person</code> endpoint:</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
@@ -727,7 +727,7 @@ kubectl get routes | grep passport</code></pre>
 <h2 id="skuppermetrics"><a class="anchor" href="#skuppermetrics"></a>Skupper Metrics</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You can access to Skupper UI to get an overview of the clusters, or consult collected that like traffic send through clusters.
+<p>You can access the Skupper UI to get an overview of the clusters or consult the data collected, such as traffic sent through clusters.
 To access Skupper UI (which is running in <strong>cluster 1</strong>), you need to expose <code>skupper</code> service on port <code>8080</code>:</p>
 </div>
 <div class="listingblock console-input">

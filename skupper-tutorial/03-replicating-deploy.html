@@ -158,11 +158,11 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Sometimes you want to replicate a service to another cloud (or region) for resiliency purposes, for example, in case a region goes down, you might want to redircet the traffic to another region.</p>
+<p>Sometimes, you want to replicate a service to another cloud (or region) for resiliency purposes. For example, in case a region goes down, you might want to redirect the traffic to another region.</p>
 </div>
 <div class="paragraph">
 <p>Let&#8217;s deploy a backend in both clusters (<strong>c1</strong> and <strong>c2</strong>).
-Moreover, we&#8217;ll inject the name of the cluster as an environment variable so we can identify where the response is coming.</p>
+Moreover, we&#8217;ll inject the cluster&#8217;s name as an environment variable so we can identify where the response is coming from.</p>
 </div>
 <div class="paragraph">
 <p>Then, we&#8217;ll deploy the frontend in <strong>c1</strong>, and configure Skupper.</p>
@@ -178,7 +178,7 @@ Moreover, we&#8217;ll inject the name of the cluster as an environment variable 
 <h2 id="service-backend"><a class="anchor" href="#service-backend"></a>Deploying Backend</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>First of all, we need to create a deployment file for the backend.</p>
+<p>First, we must create a deployment file for the backend.</p>
 </div>
 <div class="paragraph">
 <p>Create a new file named <code>backend.yaml</code> with the following content:</p>
@@ -206,7 +206,7 @@ metadata:
   name: "hybrid-cloud-backend"
 spec:
   ports:
-  - name: "http"
+ - name: "http"
     port: 8080
     targetPort: 8080
   selector:
@@ -235,8 +235,8 @@ spec:
     spec:
       serviceAccountName: "hybrid-cloud-backend"
       containers:
-      - env:
-        - name: "KUBERNETES_NAMESPACE"
+ - env:
+ - name: "KUBERNETES_NAMESPACE"
           valueFrom:
             fieldRef:
               fieldPath: "metadata.namespace"
@@ -244,7 +244,7 @@ spec:
         imagePullPolicy: "Always"
         name: "hybrid-cloud-backend"
         ports:
-        - containerPort: 8080
+ - containerPort: 8080
           name: "http"
           protocol: "TCP"</code></pre>
 </div>
@@ -303,7 +303,7 @@ kubectl set env deployment/hybrid-cloud-backend WORKER_CLOUD_ID="kind"</code></p
 <h2 id="service-frontend"><a class="anchor" href="#service-frontend"></a>Deploying Frontend</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Create the following deployment file deploy the frontend to <strong>Cluster 1</strong>:</p>
+<p>Create the following deployment file and deploy the frontend to <strong>Cluster 1</strong>:</p>
 </div>
 <div class="listingblock console-input">
 <div class="title">2-frontend.yaml</div>
@@ -326,7 +326,7 @@ metadata:
   name: "hybrid-cloud-frontend"
 spec:
   ports:
-  - name: "http"
+ - name: "http"
     port: 8080
     targetPort: 8080
   selector:
@@ -354,8 +354,8 @@ spec:
         app.kubernetes.io/version: "1.0.0"
     spec:
       containers:
-      - env:
-        - name: "KUBERNETES_NAMESPACE"
+ - env:
+ - name: "KUBERNETES_NAMESPACE"
           valueFrom:
             fieldRef:
               fieldPath: "metadata.namespace"
@@ -363,7 +363,7 @@ spec:
         imagePullPolicy: "IfNotPresent"
         name: "hybrid-cloud-frontend"
         ports:
-        - containerPort: 8080
+ - containerPort: 8080
           name: "http"
           protocol: "TCP"
       serviceAccount: "hybrid-cloud-frontend"
@@ -392,7 +392,7 @@ kubectl apply -f 2-frontend.yml</code></pre>
 <h3 id="_exposing_the_frontend"><a class="anchor" href="#_exposing_the_frontend"></a>Exposing the Frontend</h3>
 <div class="paragraph">
 <p>The Frontend Kubernetes service is of type LoadBalancer.
-If you are deploying the frontend in your public cluster you need to configure Ingress object, or in the case of OpenShift (like <strong>Cluster 1</strong>), you can use the Route object:</p>
+If you are deploying the frontend in your public cluster, you need to configure the Ingress object, or in the case of OpenShift (like <strong>Cluster 1</strong>), you can use the Route object:</p>
 </div>
 <div class="tabset is-loading">
 <div class="ulist tabs">
@@ -422,9 +422,9 @@ metadata:
   name: "hybrid-cloud-frontend"
 spec:
   rules:
-    - http:
+ - http:
         paths:
-          - backend:
+ - backend:
               service:
                 name: "hybrid-cloud-frontend"
                 port:
@@ -494,7 +494,7 @@ hybrid-cloud-frontend   hybrid-cloud-frontend-asotobue-dev.apps.sandbox-m4.g2pi.
 </div>
 </div>
 <div class="paragraph">
-<p>At this point, you&#8217;ve got the backend deployed in both clusters, and frontend in the main cluster.
+<p>At this point, the backend is deployed in both clusters, and the front end is in the main cluster.
 Now, let&#8217;s deploy Skupper.</p>
 </div>
 </div>
@@ -504,8 +504,8 @@ Now, let&#8217;s deploy Skupper.</p>
 <h2 id="installskupperproxyrep"><a class="anchor" href="#installskupperproxyrep"></a>Installing Skupper Proxy</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Skupper can also be installed after application is running.
-In <strong>cluster 1</strong> (you have already the context pointing out there), install Skupper proxy, and generate the token:</p>
+<p>Skupper can also be installed after the application is running.
+In <strong>cluster 1</strong> (you already have the context pointing out there), install Skupper proxy and generate the token:</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
@@ -557,7 +557,7 @@ skupper link create ~/sandbox.token</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Open in a browser the location of the frontend, in this case <code><a href="https://hybrid-cloud-frontend-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com" class="bare">https://hybrid-cloud-frontend-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com</a></code>, and send a request .</p>
+<p>Open a browser, type in the frontend&#8217;s location, in this case <code><a href="https://hybrid-cloud-frontend-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com" class="bare">https://hybrid-cloud-frontend-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com</a></code>, and send a request.</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -565,7 +565,7 @@ skupper link create ~/sandbox.token</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Then send the request, and you&#8217;ll see that the request was processed by the same cluster as it is deployed the frontend (<strong>cluster 1</strong> sandbox).
+<p>Then send the request, and you&#8217;ll see that the same cluster processed the request as it is deployed the frontend (<strong>cluster 1</strong> sandbox).
 This is because Skupper first tries to connect to the closest service instance, in this case, the frontend one.</p>
 </div>
 <div class="imageblock">
@@ -582,7 +582,7 @@ This is because Skupper first tries to connect to the closest service instance, 
 </div>
 </div>
 <div class="paragraph">
-<p>Then send again a request, and you&#8217;ll notice it is sent to backend of the <strong>cluster 2</strong>, as the backend of the <strong>cluster 1</strong> is offline.
+<p>Then send a request again, and you&#8217;ll notice it is sent to the backend of cluster 2, as the backend of cluster 1 is offline.
 And this happens automatically:</p>
 </div>
 <div class="imageblock">

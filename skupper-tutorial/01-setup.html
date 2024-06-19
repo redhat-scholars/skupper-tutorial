@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Setup :: Skupper Tutorial - The Path to Hybrid Cloud</title>
+    <link rel="canonical" href="https://redhat-scholars.github.io/skupper-tutorial/skupper-tutorial/01-setup.html">
+    <link rel="prev" href="index.html">
+    <link rel="next" href="02-onprem.html">
+    <meta name="generator" content="Antora 3.0.0">
+    <link rel="stylesheet" href="../_/css/site.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://developers.redhat.com" target="_blank"><img src="../_/img/RHDLogo.svg" height="40px" alt="Red Hat Developer Program"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="https://redhat-scholars.github.io/skupper-tutorial">Skupper Tutorial - The Path to Hybrid Cloud</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://developers.redhat.com/ebooks/" target="_blank">Books</a>
+        <a class="navbar-item" href="https://developers.redhat.com/cheatsheets/" target="_blank">Cheat Sheets</a>
+        <a class="navbar-item" href="https://developers.redhat.com/events/" target="_blank">Upcoming Events</a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Tutorials</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/kubernetes-tutorial/" target="_blank">Kubernetes</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/istio-tutorial/" target="_blank">Istio</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/quarkus-tutorial/" target="_blank">Quarkus</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/knative-tutorial/" target="_blank">Knative</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/tekton-tutorial/" target="_blank">Tekton</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="skupper-tutorial" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="index.html"></a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="01-setup.html">1. Setup</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#tools">Tools</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#kubectx">Optional Tools</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#rhsandbox">Red Hat Sandbox</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#kind">KinD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="02-onprem.html">2. On-Prem Database</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#installskupperproxy">Install Skupper</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#linkingclusters">Linking Clusters</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#deployingapp">Deploying the Application Clusters</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#testingperson">Testing the Application</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#skuppermetrics">Skupper Metrics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#cleanuponprem">Clean Up</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="03-replicating-deploy.html">3. Replicating Services</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-replicating-deploy.html#service-backend">Deplying Backend</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-replicating-deploy.html#service-frontend">Deplying Frontend</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-replicating-deploy.html#installskupperproxyrep">Deplying Backend</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-replicating-deploy.html#frontendui">Testing the Application</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-replicating-deploy.html#cleanuprep">Clean Up</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="04-ansible.html">4. Deploying with Ansible</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="04-ansible.html#ansible">Ansible</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="04-ansible.html#manifests">Ansible Manifests</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="04-ansible.html#installappansible">Deploying the Application</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="04-ansible.html#cleanupansible">Clean Up</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">Skupper Tutorial - The path to Hybrid Cloud</a></li>
+    <li><a href="01-setup.html">1. Setup</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/skupper-tutorial/edit/master/documentation/modules/ROOT/pages/01-setup.adoc">Edit this Page</a></div>
+  </div>
+  <div class="content">
+<article class="doc">
+<h1 class="page">Setup</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>To run this deep dive, you need two different Kubernetes clusters.
+You can skip to the following chapter if you already have two clusters. If not, this chapter will show you how to start two, one in Red Hat Sandbox and the other locally with KinD.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tools"><a class="anchor" href="#tools"></a>Tools</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To run this tutorial, you need at least two CLI tools, <code>kubectl</code> and <code>skupper</code>.</p>
+</div>
+<div class="sect2">
+<h3 id="_kubectl"><a class="anchor" href="#_kubectl"></a>Kubectl</h3>
+<div class="paragraph">
+<p>Any new version of <code>kubectl</code> should work, but the deep dive is tested with version 1.29.1.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-center valign-top"><strong>Tool</strong></th>
+<th class="tableblock halign-center valign-top"><strong>macOS</strong></th>
+<th class="tableblock halign-center valign-top"><strong>Linux</strong></th>
+<th class="tableblock halign-center valign-top"><strong>windows</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>kubectl 1.29.1</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://storage.googleapis.com/kubernetes-release/release/1.29.1/bin/darwin/amd64/kubectl">Download AMD</a> <a href="https://storage.googleapis.com/kubernetes-release/release/1.29.1/bin/darwin/arm64/kubectl">Download ARM</a></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://storage.googleapis.com/kubernetes-release/release/1.29.1/bin/linux/amd64/kubectl">Download</a></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://storage.googleapis.com/kubernetes-release/release/1.29.1/bin/windows/amd64/kubectl.exe">Download</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_skupper"><a class="anchor" href="#_skupper"></a>Skupper</h3>
+<div class="paragraph">
+<p>This deep dive is tested with Skupper 1.7.0.
+You can download the skupper CLI tool and copy to your <code>PATH</code> directory or use an installation script on Linux and Mac (<a href="https://skupper.io/install/index.html" class="bare">https://skupper.io/install/index.html</a>)</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top"><strong>Tool</strong></th>
+<th class="tableblock halign-left valign-top"><strong>macOS</strong></th>
+<th class="tableblock halign-left valign-top"><strong>Linux</strong></th>
+<th class="tableblock halign-left valign-top"><strong>windows</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>skupper 1.7.0</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://github.com/skupperproject/skupper/releases/download/1.7.0/skupper-cli-1.7.0-mac-amd64.tgz">Download AMD</a> <a href="https://github.com/skupperproject/skupper/releases/download/1.7.0/skupper-cli-1.7.0-mac-arm64.tgz">Download ARM</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://github.com/skupperproject/skupper/releases/download/1.7.0/skupper-cli-1.7.0-linux-amd64.tgz">Download</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://github.com/skupperproject/skupper/releases/download/1.7.0/skupper-cli-1.7.0-windows-amd64.zip">Download</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="kubectx"><a class="anchor" href="#kubectx"></a>Optional tools</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It is not mandatory to install <a href="https://github.com/ahmetb/kubectx">kubectx</a>, but since we will frequently change the Kubernetes context, I recommend it.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_setup_red_hat_sandbox"><a class="anchor" href="#_setup_red_hat_sandbox"></a>Setup Red Hat Sandbox</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://developers.redhat.com/developer-sandbox" target="_blank" rel="noopener">Developer Sandbox for Red Hat OpenShift</a> is a free Kubernetes cloud environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools. The Developer Sandbox is active for 30 days and renewable once it expires.</p>
+</div>
+<div class="paragraph">
+<p>To create your account, register to <a href="https://developers.redhat.com/developer-sandbox" target="_blank" rel="noopener">Developer Sandbox for Red Hat OpenShift</a>. From there, click on the red button that says <strong>Start your sandbox for free</strong> as shown in the following image.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/main/images/devsandbox-signup.png" alt="Developer Sandbox Sign-up Page">
+</div>
+</div>
+<div class="paragraph">
+<p>Use your existing Red Hat account or create a new one, then follow the instructions on the screen. You should then be redirected to the Developer Sandbox page again, but this time, you should see a button labelled <strong>Start using your sandbox</strong>.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/main/images/devsandbox-start.png" alt="Developer Sandbox Start Page">
+</div>
+</div>
+<div class="paragraph">
+<p>If the following screen is shown select the Red Hat OpenShift option:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/main/images/devsandbox-console.png" alt="Developer Sandbox Console">
+</div>
+</div>
+<div class="paragraph">
+<p>Clicking on it opens up the OpenShift login screen where you can log in using the <strong>DevSandbox</strong> button, as seen below.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/main/images/devsandbox-login.png" alt="Log in the Developer Sandbox">
+</div>
+</div>
+<div class="paragraph">
+<p>Clicking this button opens up your new OpenShift cluster console.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/main/images/devsandbox-topology-view.png" alt="Topology View">
+</div>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Quotas and Limits</div>
+<div class="paragraph">
+<p>Your private OpenShift environment on Developer Sandbox includes quotas and limits of:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>7 GB RAM</p>
+</li>
+<li>
+<p>15GB storage</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>which is enough to run this workshop.</p>
+</div>
+<div class="paragraph">
+<p>There are one fixed project (namespace):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>&lt;your_username&gt;-dev</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Please work in the <code>&lt;your_username&gt;-dev</code> project.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Also, you need to download <code>oc</code> CLI which is a <code>kubectl</code> wrapper for OpenShift.</p>
+</div>
+<div class="paragraph">
+<p>Click on the question mark <code>?</code> button, select <code>Command Line Tools</code>:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/main/images/devsandbox-question.png" alt="Download CLI">
+</div>
+</div>
+<div class="paragraph">
+<p>And finally download the <code>oc</code> CLI for your platform:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/main/images/devsandbox-downloadoc.png" alt="Download CLI">
+</div>
+</div>
+<div class="paragraph">
+<p>With <code>oc</code> downloaded and installed, it&#8217;s time to login to the cluster, click on your username select <code>Copy Login command</code>, and paste it to a terminal window:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/main/images/devsandbox-logincp.png" alt="Login To Cluster">
+</div>
+</div>
+<div class="paragraph">
+<p>After that, you can start using the cluster either with <code>oc</code> or <code>kubectl</code> CLI.</p>
+</div>
+<div class="paragraph">
+<p>After you log in to the cluster, run the following command to learn the Kubernetes context.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl config current-context
+
+asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This context name is important when you need to switch between clusters.</p>
+</div>
+<div class="paragraph">
+<p>In the rest of the deep dive, this cluster will be known as <strong>cluster 1</strong> or <strong>c1</strong>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="kind"><a class="anchor" href="#kind"></a>KinD</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To run <code>KinD</code>, you need a container engine such as Docker or Podman running on your local machine.
+In this tutorial, we advocate for Podman as a container engine, as it offers a smooth integration with <code>KinD</code>.</p>
+</div>
+<div class="sect2">
+<h3 id="_installing_podman"><a class="anchor" href="#_installing_podman"></a>Installing Podman</h3>
+<div class="paragraph">
+<p><a href="https://podman-desktop.io">Podman Desktop</a> is a powerful tool for managing containers and images on your desktop environment. It includes benefits such as running Kubernetes pods, deployment to your Kubernetes and OpenShift clusters, and Docker Desktop extension support.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s take a look at some of the features of Podman Desktop and go through some of the basic steps we&#8217;ve done in this tutorial, on Podman Desktop.</p>
+</div>
+<div class="paragraph">
+<p>Podman Desktop is available for Linux, macOS, and Windows. You can download the latest version from <a href="https://podman-desktop.io/">podman-desktop.io</a>.</p>
+</div>
+<div class="paragraph">
+<p>The installation process is straightforward and only takes a few minutes to complete.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+For MacOS users, you can easily install Podman Desktop using Homebrew. The command is <code>brew install podman-desktop</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Once installed, your Podman Desktop dashboard will show the current version of Podman, featured extensions, and a left-hand navigation menu for:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Containers</strong>: Create, manage, and delete containers.</p>
+</li>
+<li>
+<p><strong>Pods</strong>: Create and manage pods, as well as play Kubernetes YAML using Podman or a Kubernetes cluster.</p>
+</li>
+<li>
+<p><strong>Images</strong>: Pull, build (via Dockerfile), and manage images.</p>
+</li>
+<li>
+<p><strong>Volumes</strong>: Manage persistent storage for containers.</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/main/images/podman-desktop.png" alt="Login To Cluster">
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_installing_kind"><a class="anchor" href="#_installing_kind"></a>Installing KinD</h3>
+<div class="paragraph">
+<p><a href="https://kind.sigs.k8s.io/">KinD</a> is a tool for running local Kubernetes clusters using container “nodes”.
+kind was primarily designed for testing Kubernetes itself, but may be used for local development or CI.</p>
+</div>
+<div class="paragraph">
+<p>It&#8217;s really easy to start using KinD with Podman Desktop.
+Open Podman Desktop and click on bottom gear icon to open the <code>Settings</code> options.</p>
+</div>
+<div class="paragraph">
+<p>Then select <code>Resources</code> option, and click on <code>Create New</code> button of <code>Kind</code> section.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+In case you&#8217;ve not created yet, you need to create a Podman machine, clicking <code>Create New</code> button in <code>Podman</code> section.
+</td>
+</tr>
+</table>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/main/images/podman-settings.png" alt="Create KinD cluster">
+</div>
+</div>
+<div class="paragraph">
+<p>Leave the default configuration values and create the cluster:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/main/images/kind-defaults.png" alt="Create KinD cluster">
+</div>
+</div>
+<div class="paragraph">
+<p>Aftera few moments, you&#8217;ll have the cluster up and running.
+You can inspect running containers in Podman Desktop, to validate that KinD Pod is running:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/main/images/kind-cluster.png" alt="Running KinD cluster">
+</div>
+</div>
+<div class="paragraph">
+<p>If you named it as in the screenshot, the Kubernetes context for this cluster is <code>kind-kind-cluster</code>.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+If you run the <code>kubectx</code>, you&#8217;ll get a list of all current Kubernetes clusters.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This cluster will be known in the rest of the deep dive as the <strong>cluster 2</strong> or <strong>c2</strong>.</p>
+</div>
+<div class="sect3">
+<h4 id="_configuring_loadbalancer"><a class="anchor" href="#_configuring_loadbalancer"></a>Configuring LoadBalancer</h4>
+<div class="paragraph">
+<p>By default, Skupper exposes itself as a Kubernetes LoadBalancer Service.
+KinD doesn&#8217;t provide LoadBalancer implementation, so we need to enable it.
+To do that, we can install the MetalLB project.</p>
+</div>
+<div class="paragraph">
+<p>First, move to the KinD context, and apply the manifest to install the MetalLB project.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx kind-kind-cluster
+
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Set up the address pool used by load balancers. First, you need to know the IP range used by KinD inside Podman, run the following command in a terminal window and get the <code>subnet</code> field in IPv4:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">podman network inspect  kind</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">[
+     {
+          "name": "kind",
+          "id": "c1e885627ce7f1fc8126f58f9434a16db5c301401379d9f9041e17659ceb5002",
+          "driver": "bridge",
+          "network_interface": "podman1",
+          "created": "2024-06-10T20:40:03.664158043+02:00",
+          "subnets": [
+               {
+                    "subnet": "fc00:f853:ccd:e793::/64",
+                    "gateway": "fc00:f853:ccd:e793::1"
+               },
+               {
+                    "subnet": "10.89.0.0/24",
+                    "gateway": "10.89.0.1"
+               }
+          ],</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this case, the IP range should be valid for the <code>10.89.0.0/24</code> subnet.
+For example, from <code>10.89.0.10</code> to <code>10.89.0.100</code>.</p>
+</div>
+<div class="paragraph">
+<p>The last thing is to create the <code>IPAddressPool</code> object, which contains the IP range a Kubernetes with a Load Balancer type can be assigned.</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">ip-pool.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: example
+  namespace: metallb-system
+spec:
+  addresses:
+  - 10.89.0.10-10.89.0.100 <i class="conum" data-value="1"></i><b>(1)</b>
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: empty
+  namespace: metallb-system</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Substitute with your IP range</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Finally, apply the manifest:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f ip-pool.yaml</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+If you are using <code>minikube</code>, you don&#8217;t need to install MetalLB. You can run <code>minikube tunnel</code> in a terminal window, automatically assigning the IP to Kubernetes Services of type <code>LoadBalancer</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+If you use a Cloud Kubernetes installation like Red Hat Sandbox, you don&#8217;t need to configure anything as they already have this feature provided by default.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="index.html">Skupper Tutorial - The path to Hybrid Cloud</a></span>
+  <span class="next"><a href="02-onprem.html">2. On-Prem Database</a></span>
+</nav>
+</article>
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="rhd-logo" href="https://developers.redhat.com" target="_blank"></div>
+</footer>
+<script src="../_/js/vendor/clipboard.js"></script>
+<script src="../_/js/site.js"></script>
+<script async src="../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

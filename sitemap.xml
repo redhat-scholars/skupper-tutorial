@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+<loc>https://redhat-scholars.github.io/skupper-tutorial/skupper-tutorial/01-setup.html</loc>
+<lastmod>2024-06-19T08:31:27.501Z</lastmod>
+</url>
+<url>
+<loc>https://redhat-scholars.github.io/skupper-tutorial/skupper-tutorial/02-onprem.html</loc>
+<lastmod>2024-06-19T08:31:27.501Z</lastmod>
+</url>
+<url>
+<loc>https://redhat-scholars.github.io/skupper-tutorial/skupper-tutorial/03-replicating-deploy.html</loc>
+<lastmod>2024-06-19T08:31:27.501Z</lastmod>
+</url>
+<url>
+<loc>https://redhat-scholars.github.io/skupper-tutorial/skupper-tutorial/04-ansible.html</loc>
+<lastmod>2024-06-19T08:31:27.501Z</lastmod>
+</url>
+<url>
+<loc>https://redhat-scholars.github.io/skupper-tutorial/skupper-tutorial/index.html</loc>
+<lastmod>2024-06-19T08:31:27.501Z</lastmod>
+</url>
+</urlset>

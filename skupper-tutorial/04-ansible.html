@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Deploying with Ansible :: Skupper Tutorial - The Path to Hybrid Cloud</title>
+    <link rel="canonical" href="https://redhat-scholars.github.io/skupper-tutorial/skupper-tutorial/04-ansible.html">
+    <link rel="prev" href="03-replicating-deploy.html">
+    <meta name="generator" content="Antora 3.0.0">
+    <link rel="stylesheet" href="../_/css/site.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://developers.redhat.com" target="_blank"><img src="../_/img/RHDLogo.svg" height="40px" alt="Red Hat Developer Program"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="https://redhat-scholars.github.io/skupper-tutorial">Skupper Tutorial - The Path to Hybrid Cloud</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://developers.redhat.com/ebooks/" target="_blank">Books</a>
+        <a class="navbar-item" href="https://developers.redhat.com/cheatsheets/" target="_blank">Cheat Sheets</a>
+        <a class="navbar-item" href="https://developers.redhat.com/events/" target="_blank">Upcoming Events</a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Tutorials</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/kubernetes-tutorial/" target="_blank">Kubernetes</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/istio-tutorial/" target="_blank">Istio</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/quarkus-tutorial/" target="_blank">Quarkus</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/knative-tutorial/" target="_blank">Knative</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/tekton-tutorial/" target="_blank">Tekton</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="skupper-tutorial" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="index.html"></a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="01-setup.html">1. Setup</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="01-setup.html#tools">Tools</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="01-setup.html#kubectx">Optional Tools</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="01-setup.html#rhsandbox">Red Hat Sandbox</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="01-setup.html#kind">KinD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="02-onprem.html">2. On-Prem Database</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#installskupperproxy">Install Skupper</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#linkingclusters">Linking Clusters</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#deployingapp">Deploying the Application Clusters</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#testingperson">Testing the Application</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#skuppermetrics">Skupper Metrics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#cleanuponprem">Clean Up</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="03-replicating-deploy.html">3. Replicating Services</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-replicating-deploy.html#service-backend">Deplying Backend</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-replicating-deploy.html#service-frontend">Deplying Frontend</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-replicating-deploy.html#installskupperproxyrep">Deplying Backend</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-replicating-deploy.html#frontendui">Testing the Application</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-replicating-deploy.html#cleanuprep">Clean Up</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="04-ansible.html">4. Deploying with Ansible</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#ansible">Ansible</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#manifests">Ansible Manifests</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#installappansible">Deploying the Application</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#cleanupansible">Clean Up</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">Skupper Tutorial - The path to Hybrid Cloud</a></li>
+    <li><a href="04-ansible.html">4. Deploying with Ansible</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/skupper-tutorial/edit/master/documentation/modules/ROOT/pages/04-ansible.adoc">Edit this Page</a></div>
+  </div>
+  <div class="content">
+<article class="doc">
+<h1 class="page">Deploying with Ansible</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>So far, we&#8217;ve deployed and configred Skupper and the application manually using <code>skupper</code> and <code>kubectl</code>.
+One way to automate it is using <a href="https://www.ansible.com/">Ansible</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ansible"><a class="anchor" href="#ansible"></a>Ansible</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ansible is an open source IT automation engine that automates provisioning, configuration management, application deployment, orchestration, and many other IT processes.
+There are different ways to <a href="https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html">install Ansible</a>.
+The easiest way is using <code>pip</code>/<code>pipx</code>.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">pipx install --include-deps ansible
+
+python3 -m pip install --user ansible</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With Ansible installed, we need to install Ansible and Kubernetes Ansible modules.</p>
+</div>
+<div class="sect2">
+<h3 id="_installing_required_ansible_modules"><a class="anchor" href="#_installing_required_ansible_modules"></a>Installing required Ansible modules</h3>
+<div class="paragraph">
+<p>To install Skupper and Kubernetes modules you need to use  the <code>ansible-galaxy</code> command already installed with Ansible.</p>
+</div>
+<div class="paragraph">
+<p>In a terminal window, run the following command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ansible-galaxy collection install kubernetes.core
+
+ansible-galaxy collection install skupper.network</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With modules installed, we can move forward to store the Kubernetes <code>kubeconfig</code> files of noth clusters in the local directory:</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_kubeconfigs"><a class="anchor" href="#_kubeconfigs"></a>Kubeconfigs</h3>
+<div class="paragraph">
+<p>To store the <code>kubeconfig</code> of the <strong>cluster 1</strong> export <code>KUBECONFIG</code> environment variable to the following value and then run <code>oc login</code> to craete the file with the required values:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export KUBECONFIG=`pwd`/publick8sconfig
+
+oc login --token=sha256~sq_--server=https://api.sandbox-m4.g2pi.p1.openshiftapps.com:6443 <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Change this to your specific arguments.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Now, we need to store the information of the <strong>cluster 2</strong> into another <code>kubeconfig</code> file.
+First unset the previous <code>KUBECONFIG</code>, switch to <em>kind</em> context, and finally use <code>kind</code> tool to materialize the file:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">unset KUBECONFIG
+
+kubectx kind-kind-cluster
+kind export kubeconfig --name kind-cluster --kubeconfig `pwd`/privatek8sconfig</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>At this point, we can refer to these files in Ansible to login to the clusters.
+Let&#8217;s deploy the same application seen on <a href="02-onprem.html" class="xref page">Chapter 2</a> but using Ansible instead of using CLI commands.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ansiblemanifests"><a class="anchor" href="#ansiblemanifests"></a>Manifests</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_application_manifests"><a class="anchor" href="#_application_manifests"></a>Application manifests</h3>
+<div class="paragraph">
+<p>First of all, we need to create the Kubernetes manifests to deploy the application.
+They are the same used before, but as a reminder we&#8217;ll paste it here again.
+Store them into the <code>kubernetes</code> folder, so you can refer them from Ansible playbook:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">kubernetes/public.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-connection
+data:
+  QUARKUS_DATASOURCE_JDBC_URL: "jdbc:postgresql://postgres:5432/psdb"
+---
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: passport-storage
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+    app.kubernetes.io/managed-by: quarkus
+  name: passport-storage
+spec:
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app.kubernetes.io/name: passport-storage
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: passport-storage
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+    app.kubernetes.io/managed-by: quarkus
+  name: passport-storage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: passport-storage
+      app.kubernetes.io/version: 1.0.0-SNAPSHOT
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/managed-by: quarkus
+        app.kubernetes.io/name: passport-storage
+        app.kubernetes.io/version: 1.0.0-SNAPSHOT
+    spec:
+      containers:
+        - env:
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          envFrom:
+            - configMapRef:
+                name: postgres-connection
+          image: quay.io/rhdevelopers/passport-storage:1.0.0-SNAPSHOT
+          imagePullPolicy: Always
+          name: passport-storage
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: passport-storage
+spec:
+  tls:
+    termination: edge
+  to:
+    kind: Service
+    name: passport-storage
+    weight: 100
+  wildcardPolicy: None</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And the database manifest:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">kubernetes/private.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-secret
+  labels:
+    app: postgres
+data:
+  POSTGRES_DB: psdb
+  POSTGRES_USER: psuser
+  POSTGRES_PASSWORD: pspassword
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: 'postgres:14'
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: postgres-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  annotations:
+    skupper.io/proxy: "tcp" <i class="conum" data-value="1"></i><b>(1)</b>
+  labels:
+    app: postgres
+spec:
+  type: "ClusterIP"
+  ports:
+    - port: 5432
+  selector:
+    app: postgres</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ansible_manifests"><a class="anchor" href="#_ansible_manifests"></a>Ansible Manifests</h3>
+<div class="paragraph">
+<p>Now, we need to create the two most important files in Ansible, the inventory and the playbook file.
+In this case, we are going to call the <strong>cluster 1</strong> west, and <strong>cluster 2</strong> east, as these names makes the playbook look more clear.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_inventory"><a class="anchor" href="#_inventory"></a>Inventory</h3>
+<div class="paragraph">
+<p>Create an <code>inventory.yaml</code> file configuring clusters and its relationship with the following content:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">inventory.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">all:
+  vars:
+    ansible_connection: local
+  hosts:
+    west: <i class="conum" data-value="1"></i><b>(1)</b>
+      kubeconfig: "{{ inventory_dir }}/publick8sconfig" <i class="conum" data-value="2"></i><b>(2)</b>
+      namespace: asotobue-dev <i class="conum" data-value="3"></i><b>(3)</b>
+    east: <i class="conum" data-value="4"></i><b>(4)</b>
+      kubeconfig: "{{ inventory_dir }}/privatek8sconfig"
+      namespace: default
+      links: <i class="conum" data-value="5"></i><b>(5)</b>
+        - host: west
+      services: <i class="conum" data-value="6"></i><b>(6)</b>
+        postgres:
+          ports:
+            - 5432
+          targets:
+            - type: deployment
+              name: postgres</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Defines the west cluster.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Sets the <code>kubeconfig</code> file created in previous section</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Sets the namespace</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Defines the east cluster</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Defines the link between clusters</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Exposes the postgres service to west</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_playbook"><a class="anchor" href="#_playbook"></a>Playbook</h3>
+<div class="paragraph">
+<p>The last thing before we can run Ansible is to create the playbook file which does two things, installs the app to both clusters and installs and configures Skupper:
+Create the following file:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">playbook.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- hosts: localhost
+  tasks: <i class="conum" data-value="1"></i><b>(1)</b>
+    - name: Create To public
+      kubernetes.core.k8s: <i class="conum" data-value="2"></i><b>(2)</b>
+        src: ./kubernetes/public.yaml
+        namespace: asotobue-dev
+        kubeconfig: ./publick8sconfig
+
+    - name: Create To private
+      kubernetes.core.k8s:
+        src: ./kubernetes/private.yaml
+        namespace: default
+        kubeconfig: ./privatek8sconfig
+
+- hosts: all
+  collections:
+    - skupper.network <i class="conum" data-value="3"></i><b>(3)</b>
+  tasks:
+    - import_role:
+        name: skupper <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Apply the application manifests to both clusters</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Set the deployment file location and the cluster</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Import Skupper collection</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Apply the role for installing Skupper</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="installappansible"><a class="anchor" href="#installappansible"></a>Install the Application</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To install the application and the Skupper proxy in both clusters, run the following command:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ansible-playbook -i inventory.yaml playbook.yaml</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">PLAY [localhost]
+
+TASK [Gathering Facts]
+ok: [localhost]
+
+...
+
+TASK [skupper.network.skupper_common : Defining default facts]
+ok: [west]
+ok: [east]
+
+...
+
+PLAY RECAP
+east                       : ok=8    changed=1    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0
+localhost                  : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+west                       : ok=8    changed=1    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="cleanupansible"><a class="anchor" href="#cleanupansible"></a>Clean Up</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To clean up the clusters, create a new playbook invoking <code>skupper_delete</code> role.</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">playbook-delete.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">- hosts: all
+  collections:
+    - skupper.network
+  tasks:
+    - import_role:
+        name: skupper_delete
+
+- hosts: localhost
+  tasks:
+    - name: Delete public
+      kubernetes.core.k8s:
+        state: absent
+        src: ./kubernetes/public.yaml
+        namespace: asotobue-dev
+        kubeconfig: ./publick8sconfig
+
+    - name: Delete private
+      kubernetes.core.k8s:
+        state: absent
+        src: ./kubernetes/private.yaml
+        namespace: default
+        kubeconfig: ./privatek8sconfig</code></pre>
+</div>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ansible-playbook -i inventory.yaml playbook-delete.yaml</code></pre>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="03-replicating-deploy.html">3. Replicating Services</a></span>
+</nav>
+</article>
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="rhd-logo" href="https://developers.redhat.com" target="_blank"></div>
+</footer>
+<script src="../_/js/vendor/clipboard.js"></script>
+<script src="../_/js/site.js"></script>
+<script async src="../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

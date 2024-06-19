@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>On-Prem Database :: Skupper Tutorial - The Path to Hybrid Cloud</title>
+    <link rel="canonical" href="https://redhat-scholars.github.io/skupper-tutorial/skupper-tutorial/02-onprem.html">
+    <link rel="prev" href="01-setup.html">
+    <link rel="next" href="03-replicating-deploy.html">
+    <meta name="generator" content="Antora 3.0.0">
+    <link rel="stylesheet" href="../_/css/site.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://developers.redhat.com" target="_blank"><img src="../_/img/RHDLogo.svg" height="40px" alt="Red Hat Developer Program"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="https://redhat-scholars.github.io/skupper-tutorial">Skupper Tutorial - The Path to Hybrid Cloud</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://developers.redhat.com/ebooks/" target="_blank">Books</a>
+        <a class="navbar-item" href="https://developers.redhat.com/cheatsheets/" target="_blank">Cheat Sheets</a>
+        <a class="navbar-item" href="https://developers.redhat.com/events/" target="_blank">Upcoming Events</a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Tutorials</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/kubernetes-tutorial/" target="_blank">Kubernetes</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/istio-tutorial/" target="_blank">Istio</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/quarkus-tutorial/" target="_blank">Quarkus</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/knative-tutorial/" target="_blank">Knative</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/tekton-tutorial/" target="_blank">Tekton</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="skupper-tutorial" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="index.html"></a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="01-setup.html">1. Setup</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="01-setup.html#tools">Tools</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="01-setup.html#kubectx">Optional Tools</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="01-setup.html#rhsandbox">Red Hat Sandbox</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="01-setup.html#kind">KinD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="02-onprem.html">2. On-Prem Database</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#installskupperproxy">Install Skupper</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#linkingclusters">Linking Clusters</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#deployingapp">Deploying the Application Clusters</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#testingperson">Testing the Application</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#skuppermetrics">Skupper Metrics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#cleanuponprem">Clean Up</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="03-replicating-deploy.html">3. Replicating Services</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-replicating-deploy.html#service-backend">Deplying Backend</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-replicating-deploy.html#service-frontend">Deplying Frontend</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-replicating-deploy.html#installskupperproxyrep">Deplying Backend</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-replicating-deploy.html#frontendui">Testing the Application</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-replicating-deploy.html#cleanuprep">Clean Up</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="04-ansible.html">4. Deploying with Ansible</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="04-ansible.html#ansible">Ansible</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="04-ansible.html#manifests">Ansible Manifests</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="04-ansible.html#installappansible">Deploying the Application</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="04-ansible.html#cleanupansible">Clean Up</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">Skupper Tutorial - The path to Hybrid Cloud</a></li>
+    <li><a href="02-onprem.html">2. On-Prem Database</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/skupper-tutorial/edit/master/documentation/modules/ROOT/pages/02-onprem.adoc">Edit this Page</a></div>
+  </div>
+  <div class="content">
+<article class="doc">
+<h1 class="page">On-Prem Database</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let&#8217;s see the first use case of hybrid cloud.
+Suppose you&#8217;ve got a backend application that connects to a database to find some information.</p>
+</div>
+<div class="paragraph">
+<p>This database should be in a different cluster (or region) for any reason, maybe data locality, or on-prem cluster, or legacy system running in an old datacenter.</p>
+</div>
+<div class="paragraph">
+<p>In this example, we&#8217;ll deploy the backend in the <strong>cluster 1</strong> and database in the <strong>cluster 2</strong>, and connect them as they were in the same cluster:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/onprem.png" alt="onprem">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="installskupperproxy"><a class="anchor" href="#installskupperproxy"></a>Installing Skupper Proxy</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The first thing you ned to do is installing Skupper proxy in both clusters.</p>
+</div>
+<div class="paragraph">
+<p>In <strong>cluster 1</strong>, we&#8217;ll install apart from the proxy, the Skupper data collector and the UI, while only Skupper proxy in <strong>cluster 2</strong>.</p>
+</div>
+<div class="sect2">
+<h3 id="_cluster_1"><a class="anchor" href="#_cluster_1"></a>Cluster 1</h3>
+<div class="paragraph">
+<p>Let&#8217;s switch to <strong>cluster 1</strong> context and install Skupper using the <code>skupper</code> CLI.
+In a terminal window, move to the Red Hat Sandbox context and install Skupper Proxy, Console UI, and data collector:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue <i class="conum" data-value="1"></i><b>(1)</b>
+
+skupper init --enable-console --enable-flow-collector --console-auth unsecured <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Change to your context.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Console is opened for deep dive purposes. In production you should remove this last argument.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Skupper is now installed in namespace '...'.  Use 'skupper status' to get more information.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, let&#8217;s install only Skupper Proxy to <strong>cluster 2</strong>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_cluster_2"><a class="anchor" href="#_cluster_2"></a>Cluster 2</h3>
+<div class="paragraph">
+<p>Let&#8217;s switch to <strong>cluster 2</strong> context and install Skupper using the <code>skupper</code> CLI:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx kind-kind-cluster
+
+skupper init <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Only Proxy.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Skupper is now installed in namespace '...'.  Use 'skupper status' to get more information.</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can run <code>skupper status</code> to check the status of Skupper in each cluster.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="linkingclusters"><a class="anchor" href="#linkingclusters"></a>Linking clusters</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>After installation, you have the infrastructure you need, but your namespaces are not linked.
+There is no network tunnel between both namespaces. So let&#8217;s create this connection.</p>
+</div>
+<div class="paragraph">
+<p>First, we need to switch to <strong>cluster 1</strong> and create a token with all information regarding this cluster.
+This token is a secret, and anyone who has the token can link to your namespace.
+Make sure that only those you trust have access to it.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue <i class="conum" data-value="1"></i><b>(1)</b>
+
+skupper token create ~/sandbox.token <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Change to your context.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Use any directory.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Token written to /Users/asotobue/sandbox.token</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Switch to <strong>cluster 2</strong> and use the generated token to create the link to cluster 1:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx kind-kind-cluster
+
+skupper link create ~/sandbox.token <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Change the location to your directory.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Site configured to link to https://claims-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com:443/0f8e04f0-27fa-11ef-a1f4-0ad176238397 (name=link1)
+Check the status of the link using 'skupper link status'.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can check the status of the link by calling <code>skupper link status</code>, as it might taken some seconds till the connecxtion is established:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">skupper link status</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Links created from this site:
+
+	 Link link1 is connected</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When both clusters are connected, we can start deploying each part of the application in each cluster.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="deployingapp"><a class="anchor" href="#deployingapp"></a>Deploying The Application</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_postgresql"><a class="anchor" href="#_postgresql"></a>PostgreSQL</h3>
+<div class="paragraph">
+<p>Let&#8217;s start deploying the PoostgreSQL database into <strong>cluster 2</strong> (KinD).
+First of all create the following YAML file to deploy the database:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">1-postgresql.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">---
+apiVersion: v1
+kind: ConfigMap <i class="conum" data-value="1"></i><b>(1)</b>
+metadata:
+  name: postgres-secret
+  labels:
+    app: postgres
+data:
+  POSTGRES_DB: psdb
+  POSTGRES_USER: psuser
+  POSTGRES_PASSWORD: pspassword
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: 'postgres:14'
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: postgres-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  annotations:
+    skupper.io/proxy: "tcp" <i class="conum" data-value="2"></i><b>(2)</b>
+  labels:
+    app: postgres
+spec:
+  type: "ClusterIP"
+  ports:
+    - port: 5432
+  selector:
+    app: postgres</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>For deep dive proposes we stick to <code>ConfigMap</code>. For production you should use a secret management.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Only Kubernetes service annotated with <code>skupper.io/proxy</code> annotation is exposed. In this case <code>tcp</code> protocol.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Finally, apply the manifest:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx kind-kind-cluster
+
+kubectl apply -f 1-postgresql.yaml</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">configmap/postgres-secret created
+deployment.apps/postgres created
+service/postgres created</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After some seconds, postgreSQL database is running in our local cluster.
+Let&#8217;s check what happened on the <strong>cluster 1</strong>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_validating_linkage"><a class="anchor" href="#_validating_linkage"></a>Validating linkage</h3>
+<div class="paragraph">
+<p>After applying the resource to <strong>cluster 2</strong>, it&#8217;s time to check how <strong>cluster 1</strong> reacted to this event:
+Let&#8217;s switch the context to <strong>cluster 1</strong>, remember that we have not deployed anything apart from Skupper in that cluster yet, and inspect the Kubernetes services presents:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue <i class="conum" data-value="1"></i><b>(1)</b>
+
+kubectl get services</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Change to your context.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">postgres               ClusterIP   172.30.97.72   5432/TCP                              2m35s <i class="conum" data-value="1"></i><b>(1)</b>
+skupper                ClusterIP   172.30.44.118  8010/TCP,8080/TCP                     134m
+skupper-prometheus     ClusterIP   172.30.142.112 9090/TCP                              134m
+skupper-router         ClusterIP   172.30.197.12  55671/TCP,45671/TCP,8081/TCP          134m
+skupper-router-local   ClusterIP   172.30.40.94   5671/TCP                              134m</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>A new Kubernetes Service poiting to the other cluster.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You see that even though we created the PostgreSQL instance in <strong>cluster 2</strong>, this <strong>cluster 1</strong> also has a Kubernetes service named <code>postgres</code> (the same name as in <strong>cluster 2</strong>).
+Every time a request is sent to <code>postgres</code> service in Kubernetes <strong>cluster 1</strong> is automatically redirected to <code>postgres</code> service in Kubernetes <strong>cluster 2</strong> using the tunnel linked in the previous section.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_backend"><a class="anchor" href="#_backend"></a>Backend</h3>
+<div class="paragraph">
+<p>Let&#8217;s deploy the backend to <strong>cluster 1</strong>.
+This application will use <code>postgres</code> hostname as database hostname as it was deployed in the local cluster, and from its point of view , it will seem so, but thanks of Skupper the requests will be sent to the other cluster.</p>
+</div>
+<div class="paragraph">
+<p>Create a <code>ConfigMap</code> resource configuring the database connection:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">2-configuration-db.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-connection
+data:
+  QUARKUS_DATASOURCE_JDBC_URL: "jdbc:postgresql://postgres:5432/psdb" <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>postgres</code> hostname</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>And apply it to <strong>cluster 1</strong>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue <i class="conum" data-value="1"></i><b>(1)</b>
+
+kubectl apply -f 2-configuration-db.yaml</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Change to your context.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Finally, deploy the backend:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">3-deployment-backend.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: passport-storage
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+    app.kubernetes.io/managed-by: quarkus
+  name: passport-storage
+spec:
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app.kubernetes.io/name: passport-storage
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: passport-storage
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+    app.kubernetes.io/managed-by: quarkus
+  name: passport-storage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: passport-storage
+      app.kubernetes.io/version: 1.0.0-SNAPSHOT
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/managed-by: quarkus
+        app.kubernetes.io/name: passport-storage
+        app.kubernetes.io/version: 1.0.0-SNAPSHOT
+    spec:
+      containers:
+        - env:
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          envFrom:
+            - configMapRef:
+                name: postgres-connection <i class="conum" data-value="1"></i><b>(1)</b>
+          image: quay.io/rhdevelopers/passport-storage:1.0.0-SNAPSHOT
+          imagePullPolicy: Always
+          name: passport-storage
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Points out to previous ConfigMap.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>And apply it:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f 3-deployment-backend.yaml</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="testingperson"><a class="anchor" href="#testingperson"></a>Testing the Application</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To test the application let&#8217;s send a request to backend requesting a list of all persons stored in the database.
+Notice that the flow will be from your laptop you&#8217;ll send an HTTP request to <strong>cluster 1</strong>, then a query will be sent to database deployed in <strong>cluster 2</strong>, the result will come back to <strong>cluster 1</strong>, which finally are back to your laptop.
+Long journey, super simple to configure it thanks of Skupper.</p>
+</div>
+<div class="paragraph">
+<p>The backend service needs to be exposed, if you are using Red Hat Sandbox or any OpenShift installation, you can use the <code>Route</code> object, if not, you will need to create an Ingress entry.</p>
+</div>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset1_ingress"></a>Ingress</p>
+</li>
+<li>
+<p><a id="tabset1_route"></a>Route</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset1_ingress">
+<div class="paragraph">
+<p>Create the following Ingress manifest and adjust the <code>host</code> with your hostname if necessary:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">ingress.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: "networking.k8s.io/v1"
+kind: "Ingress"
+metadata:
+  labels:
+    app.kubernetes.io/name: "passport-storage"
+    app.kubernetes.io/version: "1.0.0"
+  name: "passport-storage"
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              service:
+                name: "passport-storage"
+                port:
+                  number: 8080
+            path: "/"
+            pathType: Prefix</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then apply the resource:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f ingress.yaml
+
+kubectl get service passport-storage -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"</code></pre>
+</div>
+</div>
+</div>
+<div class="tab-pane" aria-labelledby="tabset1_route">
+<div class="paragraph">
+<p>Create the following Route manifest:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">route.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: passport-storage
+spec:
+  tls:
+    termination: edge
+  to:
+    kind: Service
+    name: passport-storage
+    weight: 100
+  wildcardPolicy: None</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then apply the resource:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f route.yaml
+
+kubectl get routes | grep passport</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">passport-storage       passport-storage-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com ...</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>With the endpoint to access the service send a request using <code>curl</code> (or any HTTP interface), to <code>/person</code> endpoint:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl <a href="https://passport-storage-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com/person" class="bare">https://passport-storage-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com/person</a></code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">[{"id":1,"name":"Alex","surname":"Soto"},{"id":2,"name":"Natale","surname":"Vinto"}]</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="skuppermetrics"><a class="anchor" href="#skuppermetrics"></a>Skupper Metrics</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can access to Skupper UI to get an overview of the clusters, or consult collected that like traffic send through clusters.
+To access Skupper UI (which is running in <strong>cluster 1</strong>), you need to expose <code>skupper</code> service on port <code>8080</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue <i class="conum" data-value="1"></i><b>(1)</b>
+
+kubectl get services</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Change to your context.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">...
+skupper  ClusterIP   172.30.14.195  8010/TCP,8080/TCP 37m
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In case of using Red Hat Sandbox (Or OpenShift), Skupper automatically exposes the serice as a <code>Route</code>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get routes</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">...
+skupper skupper-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com skupper metrics
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Open a browser and set the provided URL in <code>https</code> protocol, in my case was <code><a href="https://skupper-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com" class="bare">https://skupper-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com</a></code>.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If credentials are requested to access the UI, by default, they are stored in a <code>secret</code>.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get secret skupper-console-users -o jsonpath={.data.admin} | base64 -d</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">gRa0hNhx9p</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then the login is <code>admin</code> and the password is the value of the secret.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can get a topology overview by clicking on <code>Toppology</code> button:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/skupperui1.png" alt="skupperui1">
+</div>
+</div>
+<div class="paragraph">
+<p>If you click on any service, then you can inspect metrics collected by Skupper:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/skupperui2.png" alt="skupperui2">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="cleanuponprem"><a class="anchor" href="#cleanuponprem"></a>Clean Up</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let&#8217;s clean the <strong>cluster 2</strong> namespace:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx kind-kind-cluster
+
+kubectl delete -f 1-postgresql.yaml
+skupper delete</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s clean the <strong>cluster 1</strong> namespace:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue <i class="conum" data-value="1"></i><b>(1)</b>
+
+kubectl delete -f 4-route.yaml
+kubectl delete -f 3-deployment-backend.yaml
+kubectl delete -f 2-configuration-db.yaml
+
+skupper delete</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Change to your context.</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="01-setup.html">1. Setup</a></span>
+  <span class="next"><a href="03-replicating-deploy.html">3. Replicating Services</a></span>
+</nav>
+</article>
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="rhd-logo" href="https://developers.redhat.com" target="_blank"></div>
+</footer>
+<script src="../_/js/vendor/clipboard.js"></script>
+<script src="../_/js/site.js"></script>
+<script async src="../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

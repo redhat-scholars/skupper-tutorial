@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Replicating Services :: Skupper Tutorial - The Path to Hybrid Cloud</title>
+    <link rel="canonical" href="https://redhat-scholars.github.io/skupper-tutorial/skupper-tutorial/03-replicating-deploy.html">
+    <link rel="prev" href="02-onprem.html">
+    <link rel="next" href="04-ansible.html">
+    <meta name="generator" content="Antora 3.0.0">
+    <link rel="stylesheet" href="../_/css/site.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://developers.redhat.com" target="_blank"><img src="../_/img/RHDLogo.svg" height="40px" alt="Red Hat Developer Program"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="https://redhat-scholars.github.io/skupper-tutorial">Skupper Tutorial - The Path to Hybrid Cloud</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://developers.redhat.com/ebooks/" target="_blank">Books</a>
+        <a class="navbar-item" href="https://developers.redhat.com/cheatsheets/" target="_blank">Cheat Sheets</a>
+        <a class="navbar-item" href="https://developers.redhat.com/events/" target="_blank">Upcoming Events</a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Tutorials</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/kubernetes-tutorial/" target="_blank">Kubernetes</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/istio-tutorial/" target="_blank">Istio</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/quarkus-tutorial/" target="_blank">Quarkus</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/knative-tutorial/" target="_blank">Knative</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/tekton-tutorial/" target="_blank">Tekton</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="skupper-tutorial" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="index.html"></a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="01-setup.html">1. Setup</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="01-setup.html#tools">Tools</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="01-setup.html#kubectx">Optional Tools</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="01-setup.html#rhsandbox">Red Hat Sandbox</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="01-setup.html#kind">KinD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="02-onprem.html">2. On-Prem Database</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#installskupperproxy">Install Skupper</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#linkingclusters">Linking Clusters</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#deployingapp">Deploying the Application Clusters</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#testingperson">Testing the Application</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#skuppermetrics">Skupper Metrics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-onprem.html#cleanuponprem">Clean Up</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="03-replicating-deploy.html">3. Replicating Services</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#service-backend">Deplying Backend</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#service-frontend">Deplying Frontend</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#installskupperproxyrep">Deplying Backend</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#frontendui">Testing the Application</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="#cleanuprep">Clean Up</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="04-ansible.html">4. Deploying with Ansible</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="04-ansible.html#ansible">Ansible</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="04-ansible.html#manifests">Ansible Manifests</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="04-ansible.html#installappansible">Deploying the Application</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="04-ansible.html#cleanupansible">Clean Up</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">Skupper Tutorial - The path to Hybrid Cloud</a></li>
+    <li><a href="03-replicating-deploy.html">3. Replicating Services</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="https://github.com/redhat-scholars/skupper-tutorial/edit/master/documentation/modules/ROOT/pages/03-replicating-deploy.adoc">Edit this Page</a></div>
+  </div>
+  <div class="content">
+<article class="doc">
+<h1 class="page">Replicating Services</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Sometimes you want to replicate a service to another cloud (or region) for resiliency purposes, for example, in case a region goes down, you might want to redircet the traffic to another region.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s deploy a backend in both clusters (<strong>c1</strong> and <strong>c2</strong>).
+Moreover, we&#8217;ll inject the name of the cluster as an environment variable so we can identify where the response is coming.</p>
+</div>
+<div class="paragraph">
+<p>Then, we&#8217;ll deploy the frontend in <strong>c1</strong>, and configure Skupper.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/replicate.png" alt="replicate">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="service-backend"><a class="anchor" href="#service-backend"></a>Deploying Backend</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First of all, we need to create a deployment file for the backend.</p>
+</div>
+<div class="paragraph">
+<p>Create a new file named <code>backend.yaml</code> with the following content:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">1-backend.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">---
+apiVersion: "v1"
+kind: "ServiceAccount"
+metadata:
+  labels:
+    app.kubernetes.io/name: "hybrid-cloud-backend"
+    app.kubernetes.io/version: "1.0.0"
+  name: "hybrid-cloud-backend"
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  annotations:
+    skupper.io/proxy: "http" <i class="conum" data-value="1"></i><b>(1)</b>
+  labels:
+    app.kubernetes.io/name: "hybrid-cloud-backend"
+    app.kubernetes.io/version: "1.0.0"
+  name: "hybrid-cloud-backend"
+spec:
+  ports:
+  - name: "http"
+    port: 8080
+    targetPort: 8080
+  selector:
+    app.kubernetes.io/name: "hybrid-cloud-backend"
+    app.kubernetes.io/version: "1.0.0"
+  type: "ClusterIP"
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  labels:
+    app.kubernetes.io/name: "hybrid-cloud-backend"
+    app.kubernetes.io/version: "1.0.0"
+  name: "hybrid-cloud-backend"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "hybrid-cloud-backend"
+      app.kubernetes.io/version: "1.0.0"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: "hybrid-cloud-backend"
+        app.kubernetes.io/version: "1.0.0"
+    spec:
+      serviceAccountName: "hybrid-cloud-backend"
+      containers:
+      - env:
+        - name: "KUBERNETES_NAMESPACE"
+          valueFrom:
+            fieldRef:
+              fieldPath: "metadata.namespace"
+        image: "quay.io/rhdevelopers/hybrid-cloud-backend:1.0.0" <i class="conum" data-value="2"></i><b>(2)</b>
+        imagePullPolicy: "Always"
+        name: "hybrid-cloud-backend"
+        ports:
+        - containerPort: 8080
+          name: "http"
+          protocol: "TCP"</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Sets the service to be skupperized</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>If you are using Podman in an ARM architecture use <code>quay.io/rhdevelopers/hybrid-cloud-backend:1.0.0-arm</code></td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="deployment-backend-1"><a class="anchor" href="#deployment-backend-1"></a>Deployment Backend to the Cluster 1</h3>
+<div class="paragraph">
+<p>While logged into the <strong>Cluster 1</strong>, run the following commands:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue <i class="conum" data-value="1"></i><b>(1)</b>
+
+kubectl apply -f 1-backend.yml
+kubectl set env deployment/hybrid-cloud-backend WORKER_CLOUD_ID="sandbox"</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Change to your context.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="deployment-backend-2"><a class="anchor" href="#deployment-backend-2"></a>Deployment Backend to the Cluster 2</h3>
+<div class="paragraph">
+<p>While logged into the <strong>Cluster 2</strong>, run the following commands:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx kind-kind-cluster
+
+kubectl apply -f 1-backend.yml
+kubectl set env deployment/hybrid-cloud-backend WORKER_CLOUD_ID="kind"</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="service-frontend"><a class="anchor" href="#service-frontend"></a>Deploying Frontend</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Create the following deployment file deploy the frontend to <strong>Cluster 1</strong>:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">2-frontend.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">---
+apiVersion: "v1"
+kind: "ServiceAccount"
+metadata:
+  labels:
+    app.kubernetes.io/name: "hybrid-cloud-frontend"
+    app.kubernetes.io/version: "1.0.0"
+  name: "hybrid-cloud-frontend"
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  labels:
+    app.kubernetes.io/name: "hybrid-cloud-frontend"
+    app.kubernetes.io/version: "1.0.0"
+  name: "hybrid-cloud-frontend"
+spec:
+  ports:
+  - name: "http"
+    port: 8080
+    targetPort: 8080
+  selector:
+    app.kubernetes.io/name: "hybrid-cloud-frontend"
+    app.kubernetes.io/version: "1.0.0"
+  type: "LoadBalancer"
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  labels:
+    app.kubernetes.io/name: "hybrid-cloud-frontend"
+    app.kubernetes.io/version: "1.0.0"
+  name: "hybrid-cloud-frontend"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "hybrid-cloud-frontend"
+      app.kubernetes.io/version: "1.0.0"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: "hybrid-cloud-frontend"
+        app.kubernetes.io/version: "1.0.0"
+    spec:
+      containers:
+      - env:
+        - name: "KUBERNETES_NAMESPACE"
+          valueFrom:
+            fieldRef:
+              fieldPath: "metadata.namespace"
+        image: "quay.io/rhdevelopers/hybrid-cloud-frontend:1.0.0"
+        imagePullPolicy: "IfNotPresent"
+        name: "hybrid-cloud-frontend"
+        ports:
+        - containerPort: 8080
+          name: "http"
+          protocol: "TCP"
+      serviceAccount: "hybrid-cloud-frontend"
+---</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Log again into the <strong>Cluster 1</strong> and deploy the frontend:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue <i class="conum" data-value="1"></i><b>(1)</b>
+
+kubectl apply -f 2-frontend.yml</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Change to your context.</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_exposing_the_frontend"><a class="anchor" href="#_exposing_the_frontend"></a>Exposing the Frontend</h3>
+<div class="paragraph">
+<p>The Frontend Kubernetes service is of type LoadBalancer.
+If you are deploying the frontend in your public cluster you need to configure Ingress object, or in the case of OpenShift (like <strong>Cluster 1</strong>), you can use the Route object:</p>
+</div>
+<div class="tabset is-loading">
+<div class="ulist tabs">
+<ul>
+<li>
+<p><a id="tabset1_ingress"></a>Ingress</p>
+</li>
+<li>
+<p><a id="tabset1_route"></a>Route</p>
+</li>
+</ul>
+</div>
+<div class="content">
+<div class="tab-pane" aria-labelledby="tabset1_ingress">
+<div class="paragraph">
+<p>Create the following Ingress manifest and adjust the <code>host</code> with your hostname if necessary:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">3-ingress.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: "networking.k8s.io/v1"
+kind: "Ingress"
+metadata:
+  labels:
+    app.kubernetes.io/name: "hybrid-cloud-frontend"
+    app.kubernetes.io/version: "1.0.0"
+  name: "hybrid-cloud-frontend"
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              service:
+                name: "hybrid-cloud-frontend"
+                port:
+                  number: 8080
+            path: "/"
+            pathType: Prefix</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then apply the resource:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f ingress.yaml
+
+kubectl get service hybrid-cloud-frontend -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"</code></pre>
+</div>
+</div>
+</div>
+<div class="tab-pane" aria-labelledby="tabset1_route">
+<div class="paragraph">
+<p>Create the following Route manifest:</p>
+</div>
+<div class="listingblock console-input">
+<div class="title">3-route.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: hybrid-cloud-frontend
+spec:
+  tls:
+    termination: edge
+  to:
+    kind: Service
+    name: hybrid-cloud-frontend
+    weight: 100
+  wildcardPolicy: None</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then apply the resource:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f route.yaml
+
+kubectl get routes | grep frontend</code></pre>
+</div>
+</div>
+<div class="listingblock console-ouput">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">...
+hybrid-cloud-frontend   hybrid-cloud-frontend-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com <i class="conum" data-value="1"></i><b>(1)</b>
+...</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>We&#8217;ll use this route to access frontend.</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>At this point, you&#8217;ve got the backend deployed in both clusters, and frontend in the main cluster.
+Now, let&#8217;s deploy Skupper.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="installskupperproxyrep"><a class="anchor" href="#installskupperproxyrep"></a>Installing Skupper Proxy</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Skupper can also be installed after application is running.
+In <strong>cluster 1</strong> (you have already the context pointing out there), install Skupper proxy, and generate the token:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">skupper init --enable-console --enable-flow-collector --console-auth unsecured
+
+skupper token create ~/sandbox.token</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then in <strong>cluster 2</strong>, create the link:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx kind-kind-cluster
+
+skupper init
+
+skupper link create ~/sandbox.token</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can validate which services are exposed by running <code>service</code> subcommand:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">skupper service status</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Services exposed through Skupper:
+╰─ hybrid-cloud-backend:8080 (http1)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s open the frontend website and send a request.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="frontendui"><a class="anchor" href="#frontendui"></a>Testing</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Move to <strong>cluster 1</strong> context:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Open in a browser the location of the frontend, in this case <code><a href="https://hybrid-cloud-frontend-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com" class="bare">https://hybrid-cloud-frontend-asotobue-dev.apps.sandbox-m4.g2pi.p1.openshiftapps.com</a></code>, and send a request .</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/home.png" alt="home">
+</div>
+</div>
+<div class="paragraph">
+<p>Then send the request, and you&#8217;ll see that the request was processed by the same cluster as it is deployed the frontend (<strong>cluster 1</strong> sandbox).
+This is because Skupper first tries to connect to the closest service instance, in this case, the frontend one.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/main.png" alt="main">
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s simulate that backend of <strong>cluster 1</strong> fails by scaling to 0:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl scale deployment hybrid-cloud-backend --replicas=0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then send again a request, and you&#8217;ll notice it is sent to backend of the <strong>cluster 2</strong>, as the backend of the <strong>cluster 1</strong> is offline.
+And this happens automatically:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/rebalance.png" alt="rebalance">
+</div>
+</div>
+<div class="paragraph">
+<p>If you scale up the backend again, Skupper will start sending again to the backend deployed in <strong>cluster 1</strong>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="cleanuprep"><a class="anchor" href="#cleanuprep"></a>Clean Up</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let&#8217;s clean the <strong>cluster 2</strong> namespace:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx kind-kind-cluster
+
+kubectl delete -f 1-backend.yaml
+skupper delete</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s clean the <strong>cluster 1</strong> namespace:</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectx asotobue-dev/api-sandbox-m4-g2pi-p1-openshiftapps-com:6443/asotobue
+
+kubectl delete -f 1-backend.yaml
+kubectl delete -f 2-frontend.yaml
+kubectl delete -f 3-route.yaml
+
+skupper delete</code></pre>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="02-onprem.html">2. On-Prem Database</a></span>
+  <span class="next"><a href="04-ansible.html">4. Deploying with Ansible</a></span>
+</nav>
+</article>
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="rhd-logo" href="https://developers.redhat.com" target="_blank"></div>
+</footer>
+<script src="../_/js/vendor/clipboard.js"></script>
+<script src="../_/js/site.js"></script>
+<script async src="../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

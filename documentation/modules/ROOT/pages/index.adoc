@@ -5,7 +5,7 @@
 [.text-center.strong]
 == Using Skupper
 
-A Skupper tutorial to show how you can deploy and connect multiple aplications acorss different clusters.
+A Skupper tutorial to show how you can deploy and connect multiple aplications across different clusters.
 
 [.tiles.browse]
 == Browse modules
